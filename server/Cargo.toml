@@ -1,0 +1,46 @@
+[package]
+name = "server"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+
+shared = { path = "../shared" }
+
+# Workspace
+tokio.workspace = true
+async-trait.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+uuid.workspace = true
+chrono.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true
+thiserror.workspace = true
+dotenvy.workspace = true
+rand.workspace = true
+
+# Web
+axum = { version = "0.8.9", features = ["macros"] }
+
+# Database
+sqlx = { version = "0.9.0", features = [
+    "runtime-tokio",
+    "tls-rustls",
+    "postgres",
+    "uuid",
+    "chrono",
+    "macros",
+    "migrate",
+] }
+
+# Authentication
+jsonwebtoken = { version = "10.4.0", features = ["rust_crypto"] }
+argon2 = { version = "0.5.3", features = ["std"] }
+rand_core = { version = "*", features = ["getrandom"] }
+
+# Validation
+validator = { version = "0.20.0", features = ["derive"] }
+
+# HTTP Request logging
+tower-http = { version = "0.6", features = ["trace"] }

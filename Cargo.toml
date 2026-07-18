@@ -1,0 +1,33 @@
+[workspace]
+members = ["server", "shared", "desktop/src-tauri"]
+
+resolver = "3"
+
+[workspace.dependencies]
+
+# Async
+tokio = { version = "1.52.3", features = ["full"] }
+async-trait = "0.1.89"
+
+# Serialization
+serde = { version = "1.0.228", features = ["derive"] }
+serde_json = "1.0.150"
+
+# IDs
+uuid = { version = "1.23.5", features = ["v4", "serde"] }
+
+# Time
+chrono = { version = "0.4.45", features = ["serde"] }
+
+# Logging
+tracing = "0.1.44"
+tracing-subscriber = { version = "0.3.23", features = ["env-filter"] }
+
+# Errors
+thiserror = "2.0.18"
+
+# Config
+dotenvy = "0.15.7"
+
+# Random
+rand = "0.10.2"
