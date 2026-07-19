@@ -2,7 +2,7 @@ use crate::auth::jwt::*;
 use crate::auth::password::*;
 use crate::config::Config;
 use crate::repositories::auth_repository::*;
-use shared::models::auth_models::{AuthResponse, LoginRequest, RegisterRequest, UserDto};
+use shared::models::auth_models::{AuthResponse, LoginRequest, RegisterRequest};
 use sqlx::PgPool;
 
 use crate::errors::AppError;
@@ -27,12 +27,7 @@ pub async fn service_register(
                 create_access_token(user.id, &config.jwt_secret, &config.jwt_expiration_hours)?;
             Ok(AuthResponse {
                 access_token,
-                user: UserDto {
-                    id: user.id,
-                    username: user.username,
-                    email: user.email,
-                    display_name: user.display_name,
-                },
+                user: user.into(),
             })
         }
         Err(sqlx::Error::Database(db_error)) => match db_error.constraint() {
@@ -65,11 +60,6 @@ pub async fn service_login(
 
     Ok(AuthResponse {
         access_token,
-        user: UserDto {
-            id: user.id,
-            username: user.username,
-            email: user.email,
-            display_name: user.display_name,
-        },
+        user: user.into(),
     })
 }
