@@ -1,0 +1,7 @@
+{
+    "tasks": {
+        "gen:types": "cd .. && cargo run -p shared --bin export_ts",
+        "dev": "deno task gen:types && vite",
+        "build": "deno task gen:types && vite build"
+    }
+}
