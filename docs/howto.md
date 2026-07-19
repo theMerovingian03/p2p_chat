@@ -10,6 +10,7 @@
 2. In dir ```p2p_chat```, run ```cargo install create-tauri-app```
 3. Run: ```cargo create-tauri-app```
 4. Make sure to name the package ```desktop```
+5. Run as webapp: ```deno run dev``` in ```desktop/``` directory
 
 ### Database
 1. Add your PostgreSQL ```DATABASE_URL``` to ```.env```
@@ -19,4 +20,14 @@
 
 ### Run indvidual packages (```server```, ```shared```, ```desktop```, etc.)
 
-```cargo run -p <package_name>```
+* ```cargo run -p <package_name>```
+
+### Create shared types from for the frontend
+
+* ```deno task gen:types```
+
+OR 
+
+* ```deno task dev```
+
+Edit ```desktop/src/deno.json``` to implement additional tasks.

@@ -1,7 +1,8 @@
 use serde::{Deserialize, Serialize};
+use specta::Type;
 use uuid::Uuid;
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Type)]
 pub struct RegisterRequest {
     pub username: String,
     pub email: String,
@@ -9,13 +10,13 @@ pub struct RegisterRequest {
     pub display_name: String,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Type)]
 pub struct LoginRequest {
     pub identifier: String,
     pub password: String,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, Type)]
 pub struct UserDto {
     pub id: Uuid,
     pub username: String,
@@ -23,7 +24,7 @@ pub struct UserDto {
     pub display_name: String,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, Type)]
 pub struct AuthResponse {
     pub access_token: String,
     pub user: UserDto,
