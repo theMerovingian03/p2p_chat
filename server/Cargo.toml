@@ -43,4 +43,4 @@ rand_core = { version = "*", features = ["getrandom"] }
 validator = { version = "0.20.0", features = ["derive"] }
 
 # HTTP Request logging
-tower-http = { version = "0.6", features = ["trace"] }
+tower-http = { version = "0.6", features = ["trace", "cors"] }

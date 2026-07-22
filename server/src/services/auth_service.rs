@@ -19,6 +19,7 @@ pub async fn service_register(
         &request.username,
         &password_hash,
         &request.display_name,
+        None,
     )
     .await
     {
@@ -63,3 +64,10 @@ pub async fn service_login(
         user: user.into(),
     })
 }
+
+// pub async fn create_guest_user(
+//     db: &PgPool,
+//     config: &Config,
+// ) -> Result<AuthResponse, AppError> {
+
+// }

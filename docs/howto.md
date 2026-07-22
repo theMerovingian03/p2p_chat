@@ -1,4 +1,4 @@
-## Steps to install, setup and run
+## Steps to install, setup and run (ONLY FOR DEV REFERENCE)
 
 ### Prerequisites
 1. Rust ```rustc 1.96.0```
@@ -10,7 +10,9 @@
 2. In dir ```p2p_chat```, run ```cargo install create-tauri-app```
 3. Run: ```cargo create-tauri-app```
 4. Make sure to name the package ```desktop```
-5. Run as webapp: ```deno run dev``` in ```desktop/``` directory
+5. Install Tailwind: ```deno add npm:tailwindcss npm:@tailwindcss/vite```
+6. Add ```VITE_API_URL``` to ```desktop/.env```
+7. Run as webapp: ```deno run dev``` in ```desktop/``` directory
 
 ### Database
 1. Add your PostgreSQL ```DATABASE_URL``` to ```.env```

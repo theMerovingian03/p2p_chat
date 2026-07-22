@@ -9,7 +9,12 @@ mod services;
 mod state;
 
 use axum::{
-    Router, middleware as axum_middleware,
+    Router,
+    http::{
+        HeaderValue, Method,
+        header::{AUTHORIZATION, CONTENT_TYPE},
+    },
+    middleware as axum_middleware,
     routing::{get, post},
 };
 use config::Config;
@@ -18,6 +23,7 @@ use routes::user_routes::*;
 use sqlx::postgres::PgPoolOptions;
 use state::AppState;
 use tokio::net::TcpListener;
+use tower_http::cors::CorsLayer;
 use tower_http::trace::TraceLayer;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
@@ -31,6 +37,8 @@ async fn main() {
         .init();
     // Config
     let conf = Config::from_env().expect("Failed to load configuration");
+    // Seperate here to avoid move errors
+    let client_url = conf.client_url.clone();
     // Database Pool
     let pool = PgPoolOptions::new()
         .connect(&conf.database_url)
@@ -54,11 +62,17 @@ async fn main() {
                 state.clone(),
                 auth_middleware,
             ));
+    // Setup CORS
+    let cors = CorsLayer::new()
+        .allow_origin(HeaderValue::from_str(&client_url).unwrap())
+        .allow_methods([Method::GET, Method::POST, Method::GET, Method::DELETE])
+        .allow_headers([CONTENT_TYPE, AUTHORIZATION]);
     // Main app
     let app = Router::new()
         .merge(auth_routes)
         .merge(protected_routes)
         .with_state(state)
+        .layer(cors)
         .layer(TraceLayer::new_for_http());
 
     // Bind listener to host:port
