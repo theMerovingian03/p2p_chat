@@ -1,4 +1,5 @@
 use crate::models::user_model::User;
+use chrono::{Duration, Utc};
 use sqlx::PgPool;
 
 pub async fn create_user(
@@ -9,11 +10,17 @@ pub async fn create_user(
     display_name: &str,
     is_guest: Option<bool>,
 ) -> Result<User, sqlx::Error> {
+    let guest = is_guest.unwrap_or(false);
+    let expires_at = if guest {
+        Some(Utc::now() + Duration::hours(24))
+    } else {
+        None
+    };
     sqlx::query_as::<_, User>(
         "
         INSERT INTO users
-    (username, email, password_hash, display_name, is_guest)
-    VALUES ($1, $2, $3, $4, $5)
+    (username, email, password_hash, display_name, is_guest, expires_at)
+    VALUES ($1, $2, $3, $4, $5, $6)
     RETURNING *
         ",
     )
@@ -21,7 +28,8 @@ pub async fn create_user(
     .bind(email)
     .bind(password_hash)
     .bind(display_name)
-    .bind(is_guest.unwrap_or(false))
+    .bind(guest)
+    .bind(expires_at)
     .fetch_one(db)
     .await
 }

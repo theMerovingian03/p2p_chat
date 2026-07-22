@@ -44,3 +44,6 @@ validator = { version = "0.20.0", features = ["derive"] }
 
 # HTTP Request logging
 tower-http = { version = "0.6", features = ["trace", "cors"] }
+
+# Random name generator
+names = "0.14.0"

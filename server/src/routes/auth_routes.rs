@@ -1,6 +1,6 @@
-use crate::services::auth_service::service_register;
+use crate::errors::AppError;
+use crate::services::auth_service::*;
 use crate::state::AppState;
-use crate::{errors::AppError, services::auth_service::service_login};
 use axum::{
     extract::{Json, State},
     http::StatusCode,
@@ -22,5 +22,13 @@ pub async fn login_user(
     Json(request): Json<LoginRequest>,
 ) -> Result<(StatusCode, Json<AuthResponse>), AppError> {
     let response = service_login(&state.db_pool, request, &state.config).await?;
+    Ok((StatusCode::OK, Json(response)))
+}
+
+#[axum::debug_handler]
+pub async fn create_guest_user(
+    State(state): State<AppState>,
+) -> Result<(StatusCode, Json<AuthResponse>), AppError> {
+    let response = service_create_guest_user(&state.db_pool, &state.config).await?;
     Ok((StatusCode::OK, Json(response)))
 }

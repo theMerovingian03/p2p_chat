@@ -52,7 +52,8 @@ async fn main() {
     // Register auth routes
     let auth_routes = Router::new()
         .route("/auth/register", post(register_user))
-        .route("/auth/login", post(login_user));
+        .route("/auth/login", post(login_user))
+        .route("/auth/guest", post(create_guest_user));
 
     // TODO: Register protected routes
     let protected_routes =
