@@ -1,0 +1,55 @@
+import { guest_login } from '../api/auth';
+import { useState } from 'react';
+
+export default function GuestLoginPage() {
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+
+    async function handleSubmit(e: React.SubmitEvent<HTMLElement>) {
+        e.preventDefault()
+        setError(null);
+        setLoading(true);
+
+        try {
+            const response = await guest_login();
+            console.log("Created guest login!", response);
+        } catch (err) {
+            if (err instanceof Error) {
+                setError(err.message);
+            } else {
+                setError("Something went wrong!");
+            }
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    return (
+        <main>
+            <div className='items-center'>
+                <div className="flex min-h-screen items-center justify-center">
+                    <form onSubmit={handleSubmit} className="w-full max-w-md rounded-lg p-6 text-white">
+                        <div className="flex w-full flex-col">
+                            <h2 className="mt-2 text-center">Guest Login</h2>
+                            <div className="flex flex-col space-y-2 p-2 text-sm">
+                                <div className="rounded-2xl border-t-1 border-r-1 p-2.5">
+                                    <p>Create a temporary account now!</p>
+                                    <ul className="text-s mt-2 list-disc pl-5">
+                                        <li>Full access to chat and messaging features</li>
+                                        <li>No email, password, or signup needed</li>
+                                        <li>Account automatically expires after 24 hours</li>
+                                    </ul>
+                                </div>
+                                {error && <p>{error}</p>}
+                                <button type="submit" className='mt-3 w-full rounded-2xl border-1 p-2.5 text-center'>
+                                    {loading ? "Getting temporary credentials..." : "Let's Go!"}
+                                </button>
+                            </div>
+                        </div>
+                        <p className="text-center text-xs">Already have an account? Login Here</p>
+                    </form>
+                </div>
+            </div>
+        </main>
+    )
+}

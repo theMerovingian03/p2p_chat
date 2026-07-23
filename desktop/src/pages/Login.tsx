@@ -52,7 +52,7 @@ export default function LoginPage() {
                                 </button>
                             </div>
                         </div>
-                        <p className="text-center text-xs">Don't have an account? Create one here</p>
+                        <p className="text-center text-xs">Don't have an account? Create one here. OR Use a guest account.</p>
                     </form>
                 </div>
             </div>

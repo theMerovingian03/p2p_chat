@@ -75,7 +75,7 @@ export default function RegisterPage() {
                                 </button>
                             </div>
                         </div>
-                        <p className="text-center text-xs">Already have an account? Login Here</p>
+                        <p className="text-center text-xs">Already have an account? Login Here. OR Use a guest account</p>
                     </form>
                 </div>
             </div>

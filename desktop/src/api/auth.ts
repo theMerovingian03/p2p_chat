@@ -22,3 +22,11 @@ export async function login(
     }
     );
 }
+
+export async function guest_login(): Promise<AuthResponse> {
+    return api<AuthResponse>(
+        "/auth/guest", {
+        method: "POST"
+    }
+    );
+}
