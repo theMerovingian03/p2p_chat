@@ -11,7 +11,7 @@ input:-webkit-autofill:active {
     border-color: white !important;
 }
 
-body {
+/* body {
     font-family: 'Asap', sans-serif;
     height: 100%;
     background: #353589;
@@ -21,10 +21,35 @@ body {
         rgba(87, 93, 199, 1) 60%,
         rgba(83, 181, 237, 1) 100%
     );
-    /* background: #353589;
+} */
+
+/* background: #353589;
+background: linear-gradient(
+    145deg,rgba(53, 53, 137, 1) 0%, 
+    rgba(67, 71, 181, 1) 54%, 
+    rgba(87, 93, 199, 1) 100%
+); */
+
+html,
+body,
+#root {
+    height: 100%;
+    margin: 0;
+}
+
+.background {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+
     background: linear-gradient(
-        145deg,rgba(53, 53, 137, 1) 0%, 
-        rgba(67, 71, 181, 1) 54%, 
-        rgba(87, 93, 199, 1) 100%
-    ); */
+        145deg,
+        rgba(53, 53, 137, 1) 0%,
+        rgba(87, 93, 199, 1) 60%,
+        rgba(83, 181, 237, 1) 100%
+    );
+}
+
+.content {
+    min-height: 100vh;
 }

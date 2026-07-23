@@ -5,7 +5,7 @@
   "identifier": "com.p2pchat.tauri",
   "build": {
     "beforeDevCommand": "deno task dev",
-    "devUrl": "http://localhost:1420",
+    "devUrl": "http://127.0.0.1:1420",
     "beforeBuildCommand": "deno task build",
     "frontendDist": "../dist"
   },

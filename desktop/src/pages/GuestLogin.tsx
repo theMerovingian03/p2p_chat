@@ -1,12 +1,14 @@
 import { guest_login } from '../api/auth';
 import { useState } from 'react';
 import { useAuthStore } from '../stores/authStore';
+import { Link, useNavigate } from 'react-router-dom';
 
 export default function GuestLoginPage() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const setAccessToken = useAuthStore((state) => state.setAccessToken);
     const setUser = useAuthStore((state) => state.setUser);
+    const navigate = useNavigate();
 
     async function handleSubmit(e: React.SubmitEvent<HTMLElement>) {
         e.preventDefault()
@@ -18,6 +20,8 @@ export default function GuestLoginPage() {
 
             setAccessToken(response.access_token);
             setUser(response.user);
+
+            navigate("/");
         } catch (err) {
             if (err instanceof Error) {
                 setError(err.message);
@@ -51,7 +55,16 @@ export default function GuestLoginPage() {
                                 </button>
                             </div>
                         </div>
-                        <p className="text-center text-xs">Already have an account? Login Here</p>
+                        <p className="text-center text-xs">
+                            Already have an account?{" "}
+                            <Link to={"/login"} className="underline">
+                                Login Here{" "}
+                            </Link>
+                            OR{" "}
+                            <Link to={"/register"} className="underline">
+                                Create a new account
+                            </Link>
+                        </p>
                     </form>
                 </div>
             </div>

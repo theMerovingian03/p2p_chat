@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useAuthStore } from "../stores/authStore";
+import { Link, useNavigate } from "react-router-dom";
 
 import { register } from "../api/auth";
 
@@ -11,6 +12,7 @@ export default function RegisterPage() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
+    const navigate = useNavigate();
 
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -31,8 +33,7 @@ export default function RegisterPage() {
 
             setAccessToken(response.access_token);
             setUser(response.user);
-            // TODO:
-            // - Navigate to home page
+            navigate("/");
         } catch (err) {
             if (err instanceof Error) {
                 setError(err.message);
@@ -76,7 +77,16 @@ export default function RegisterPage() {
                                 </button>
                             </div>
                         </div>
-                        <p className="text-center text-xs">Already have an account? Login Here. OR Use a guest account</p>
+                        <p className="text-center text-xs">
+                            Already have an account?{" "}
+                            <Link to={"/login"} className="underline">
+                                Login Here.
+                            </Link>
+                            OR{" "}
+                            <Link to={"/guest"} className="underline">
+                                Use a guest account.
+                            </Link>
+                        </p>
                     </form>
                 </div>
             </div>

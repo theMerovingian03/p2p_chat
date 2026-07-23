@@ -1,6 +1,7 @@
 import { login } from "../api/auth";
 import { useState } from "react";
 import { useAuthStore } from "../stores/authStore";
+import { Link, useNavigate } from "react-router-dom";
 
 export default function LoginPage() {
     const setAccessToken = useAuthStore((state) => state.setAccessToken);
@@ -9,6 +10,7 @@ export default function LoginPage() {
     const [password, setPassword] = useState("");
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const navigate = useNavigate();
 
     async function handleSubmit(e: React.SubmitEvent<HTMLElement>) {
         e.preventDefault()
@@ -23,6 +25,8 @@ export default function LoginPage() {
 
             setAccessToken(response.access_token);
             setUser(response.user);
+
+            navigate("/");
         } catch (err) {
             if (err instanceof Error) {
                 setError(err.message);
@@ -56,7 +60,16 @@ export default function LoginPage() {
                                 </button>
                             </div>
                         </div>
-                        <p className="text-center text-xs">Don't have an account? Create one here. OR Use a guest account.</p>
+                        <p className="text-center text-xs">
+                            Don't have an account?{" "}
+                            <Link to="/register" className="underline">
+                                Create one here
+                            </Link>{" "}
+                            OR{" "}
+                            <Link to="/guest" className="underline">
+                                Use a guest account.
+                            </Link>
+                        </p>
                     </form>
                 </div>
             </div>
