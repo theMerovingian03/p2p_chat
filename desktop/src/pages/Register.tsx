@@ -1,8 +1,11 @@
 import { useState } from "react";
+import { useAuthStore } from "../stores/authStore";
 
 import { register } from "../api/auth";
 
 export default function RegisterPage() {
+    const setAccessToken = useAuthStore((state) => state.setAccessToken);
+    const setUser = useAuthStore((state) => state.setUser);
     const [username, setUsername] = useState("");
     const [display_name, setDisplayName] = useState("");
     const [email, setEmail] = useState("");
@@ -26,11 +29,9 @@ export default function RegisterPage() {
                 password,
             });
 
-            console.log("Registered:", response);
-
+            setAccessToken(response.access_token);
+            setUser(response.user);
             // TODO:
-            // - Save access token
-            // - Save user
             // - Navigate to home page
         } catch (err) {
             if (err instanceof Error) {

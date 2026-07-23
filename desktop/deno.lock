@@ -15,7 +15,8 @@
     "npm:tailwindcss@*": "4.3.3",
     "npm:tailwindcss@^4.3.3": "4.3.3",
     "npm:typescript@~6.0.3": "6.0.3",
-    "npm:vite@^8.0.16": "8.1.4"
+    "npm:vite@^8.0.16": "8.1.4",
+    "npm:zustand@^5.0.14": "5.0.14_@types+react@19.2.17_react@19.2.7"
   },
   "npm": {
     "@emnapi/core@1.11.1": {
@@ -572,6 +573,17 @@
         "fsevents"
       ],
       "bin": true
+    },
+    "zustand@5.0.14_@types+react@19.2.17_react@19.2.7": {
+      "integrity": "sha512-/8tAspM5LMPr28b3fwLYrtdj77ECpfZviaP75CMTnwO8ISyaE4GDIG/9rDDYq/cH9D2Xw2A2RXglLInmVBQB/g==",
+      "dependencies": [
+        "@types/react",
+        "react"
+      ],
+      "optionalPeers": [
+        "@types/react",
+        "react"
+      ]
     }
   },
   "workspace": {
@@ -593,7 +605,8 @@
         "npm:react@^19.1.0",
         "npm:tailwindcss@^4.3.3",
         "npm:typescript@~6.0.3",
-        "npm:vite@^8.0.16"
+        "npm:vite@^8.0.16",
+        "npm:zustand@^5.0.14"
       ]
     }
   }

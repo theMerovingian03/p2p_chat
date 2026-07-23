@@ -1,7 +1,10 @@
 import { login } from "../api/auth";
 import { useState } from "react";
+import { useAuthStore } from "../stores/authStore";
 
 export default function LoginPage() {
+    const setAccessToken = useAuthStore((state) => state.setAccessToken);
+    const setUser = useAuthStore((state) => state.setUser);
     const [identifier, setIdentifier] = useState("");
     const [password, setPassword] = useState("");
     const [loading, setLoading] = useState(false);
@@ -18,7 +21,8 @@ export default function LoginPage() {
                 password
             });
 
-            console.log("Logged in successfully!", response);
+            setAccessToken(response.access_token);
+            setUser(response.user);
         } catch (err) {
             if (err instanceof Error) {
                 setError(err.message);

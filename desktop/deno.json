@@ -2,7 +2,8 @@
     "tasks": {
         "gen:types": "cd .. && cargo run -p shared --bin export_ts",
         "dev": "deno task gen:types && vite",
-        "build": "deno task gen:types && vite build"
+        "build": "deno task gen:types && vite build",
+        "desktop": "deno run -A npm:@tauri-apps/cli dev"
     },
     "imports": {
         "@tailwindcss/vite": "npm:@tailwindcss/vite",

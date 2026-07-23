@@ -1,9 +1,12 @@
 import { guest_login } from '../api/auth';
 import { useState } from 'react';
+import { useAuthStore } from '../stores/authStore';
 
 export default function GuestLoginPage() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const setAccessToken = useAuthStore((state) => state.setAccessToken);
+    const setUser = useAuthStore((state) => state.setUser);
 
     async function handleSubmit(e: React.SubmitEvent<HTMLElement>) {
         e.preventDefault()
@@ -12,7 +15,9 @@ export default function GuestLoginPage() {
 
         try {
             const response = await guest_login();
-            console.log("Created guest login!", response);
+
+            setAccessToken(response.access_token);
+            setUser(response.user);
         } catch (err) {
             if (err instanceof Error) {
                 setError(err.message);

@@ -1,17 +1,22 @@
 import { env } from "../config/env";
-
-let accessToken: string | null = null;
+import { useAuthStore } from "../stores/authStore";
 
 export async function api<T>(
     path: string,
     options?: RequestInit
 ): Promise<T> {
+
+    const token = useAuthStore.getState().accessToken;
+    const headers = new Headers(options?.headers);
+    headers.set("Content-Type", "application/json");
+
+    if (token) {
+        headers.set("Authorization", `Bearer ${token}`);
+    }
+
     const response = await fetch(`${env.apiUrl}${path}`, {
-        headers: {
-            "Content-Type": "application/json",
-            ...(options?.headers ?? {}),
-        },
         ...options,
+        headers,
     });
 
     if (!response.ok) {
@@ -19,7 +24,3 @@ export async function api<T>(
     }
     return response.json() as Promise<T>;
 }
-
-export function setAccessToken(token: string | null) {
-    accessToken = token;
-} 
