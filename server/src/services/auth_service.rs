@@ -1,11 +1,18 @@
 use crate::auth::jwt::*;
 use crate::auth::password::*;
+use crate::auth::refresh_token::decode_refresh_token;
 use crate::config::Config;
 use crate::repositories::auth_repository::*;
+use crate::repositories::session_repository::*;
+use chrono::Utc;
 use names::{Generator, Name};
 use rand::{RngExt, distr::Alphanumeric};
+use shared::models::auth_models::RefreshSessionRequest;
+use shared::models::auth_models::RefreshSessionResponse;
 use shared::models::auth_models::{AuthResponse, LoginRequest, RegisterRequest};
 use sqlx::PgPool;
+
+use tracing::debug;
 
 use crate::errors::AppError;
 
@@ -28,8 +35,12 @@ pub async fn service_register(
         Ok(user) => {
             let access_token =
                 create_access_token(user.id, &config.jwt_secret, &config.jwt_expiration_hours)?;
+            let refresh_token =
+                create_and_store_session(user.id, db, &config.refresh_expiration_hours).await?;
+
             Ok(AuthResponse {
                 access_token,
+                refresh_token,
                 user: user.into(),
             })
         }
@@ -60,9 +71,12 @@ pub async fn service_login(
     // Password verified so create access token
     let access_token =
         create_access_token(user.id, &config.jwt_secret, &config.jwt_expiration_hours)?;
+    let refresh_token =
+        create_and_store_session(user.id, db, &config.refresh_expiration_hours).await?;
 
     Ok(AuthResponse {
         access_token,
+        refresh_token,
         user: user.into(),
     })
 }
@@ -98,8 +112,11 @@ pub async fn service_create_guest_user(
         Ok(user) => {
             let access_token =
                 create_access_token(user.id, &config.jwt_secret, &config.jwt_expiration_hours)?;
+            let refresh_token =
+                create_and_store_session(user.id, db, &config.refresh_expiration_hours).await?;
             Ok(AuthResponse {
                 access_token,
+                refresh_token,
                 user: user.into(),
             })
         }
@@ -110,4 +127,37 @@ pub async fn service_create_guest_user(
         },
         Err(e) => Err(e.into()),
     }
+}
+
+pub async fn service_refresh_session(
+    request: RefreshSessionRequest,
+    config: &Config,
+    db: &PgPool,
+) -> Result<RefreshSessionResponse, AppError> {
+    debug!("Decoding refresh token");
+    let refresh_token_hash = decode_refresh_token(&request.refresh_token)?;
+    debug!("Decoded refresh token successfully!");
+    let session = search_session(&refresh_token_hash, db)
+        .await?
+        .ok_or(AppError::Unauthorized)?;
+    debug!("Found session!");
+    if session.expires_at < Utc::now() {
+        debug!("Session has expired!");
+        return Err(AppError::Unauthorized);
+    }
+
+    let access_token = create_access_token(
+        session.user_id,
+        &config.jwt_secret,
+        &config.jwt_expiration_hours,
+    )?;
+
+    debug!("generating new refresh token");
+    let refresh_token =
+        rotate_refresh_token(session.id, db, &config.refresh_expiration_hours).await?;
+    debug!("Refresh token generated successfully!");
+    Ok(RefreshSessionResponse {
+        access_token,
+        refresh_token,
+    })
 }

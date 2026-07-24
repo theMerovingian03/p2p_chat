@@ -41,7 +41,7 @@ export default function GuestLoginPage() {
                         <div className="flex w-full flex-col">
                             <h2 className="mt-2 text-center">Guest Login</h2>
                             <div className="flex flex-col space-y-2 p-2 text-sm">
-                                <div className="rounded-2xl border-t-1 border-r-1 p-2.5">
+                                <div className="rounded-tr-2xl border-t-1 border-r-1 p-2.5">
                                     <p>Create a temporary account now!</p>
                                     <ul className="text-s mt-2 list-disc pl-5">
                                         <li>Full access to chat and messaging features</li>

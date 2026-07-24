@@ -5,7 +5,9 @@ use axum::{
     extract::{Json, State},
     http::StatusCode,
 };
-use shared::models::auth_models::{AuthResponse, LoginRequest, RegisterRequest};
+use shared::models::auth_models::{
+    AuthResponse, LoginRequest, RefreshSessionRequest, RefreshSessionResponse, RegisterRequest,
+};
 
 #[axum::debug_handler]
 pub async fn register_user(
@@ -30,5 +32,14 @@ pub async fn create_guest_user(
     State(state): State<AppState>,
 ) -> Result<(StatusCode, Json<AuthResponse>), AppError> {
     let response = service_create_guest_user(&state.db_pool, &state.config).await?;
+    Ok((StatusCode::OK, Json(response)))
+}
+
+#[axum::debug_handler]
+pub async fn refresh_session(
+    State(state): State<AppState>,
+    Json(request): Json<RefreshSessionRequest>,
+) -> Result<(StatusCode, Json<RefreshSessionResponse>), AppError> {
+    let response = service_refresh_session(request, &state.config, &state.db_pool).await?;
     Ok((StatusCode::OK, Json(response)))
 }
