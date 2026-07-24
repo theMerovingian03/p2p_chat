@@ -72,7 +72,7 @@ export default function RegisterPage() {
 
                                 {error && <p>{error}</p>}
 
-                                <button type="submit" className="mt-3 w-full rounded-2xl border-1 p-2.5 text-center" disabled={loading}>
+                                <button type="submit" className="mt-3 w-full rounded-2xl border-1 p-2.5 text-center transition-colors duration-200 hover:bg-white hover:text-blue-900" disabled={loading}>
                                     {loading ? "Creating account..." : "Register"}
                                 </button>
                             </div>
