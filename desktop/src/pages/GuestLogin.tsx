@@ -2,6 +2,7 @@ import { guest_login } from '../api/auth';
 import { useState } from 'react';
 import { useAuthStore } from '../stores/authStore';
 import { Link, useNavigate } from 'react-router-dom';
+import { saveRefreshToken } from '../stores/tokenStore';
 
 export default function GuestLoginPage() {
     const [loading, setLoading] = useState(false);
@@ -20,6 +21,7 @@ export default function GuestLoginPage() {
 
             setAccessToken(response.access_token);
             setUser(response.user);
+            await saveRefreshToken(response.refresh_token);
 
             navigate("/");
         } catch (err) {

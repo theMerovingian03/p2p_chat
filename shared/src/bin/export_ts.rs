@@ -1,13 +1,17 @@
-use shared::models::auth_models::{AuthResponse, LoginRequest, RegisterRequest, UserDto};
+use shared::models::auth_models::{
+    AuthResponse, LoginRequest, RefreshSessionRequest, RefreshSessionResponse, RegisterRequest,
+    UserDto,
+};
 use specta::Types;
 use specta_typescript::Typescript;
 
 pub fn main() {
-    // println!("Running shared/bin/export_ts.rs");
     let types = Types::default()
         .register::<AuthResponse>()
         .register::<LoginRequest>()
         .register::<RegisterRequest>()
+        .register::<RefreshSessionRequest>()
+        .register::<RefreshSessionResponse>()
         .register::<UserDto>();
 
     Typescript::default()
@@ -17,5 +21,4 @@ pub fn main() {
             specta_serde::Format,
         )
         .unwrap();
-    // println!("Successful! /bin/export_ts.rs");
 }

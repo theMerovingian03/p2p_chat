@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useAuthStore } from "../stores/authStore";
 import { Link, useNavigate } from "react-router-dom";
+import { saveRefreshToken } from "../stores/tokenStore";
 
 import { register } from "../api/auth";
 
@@ -33,6 +34,8 @@ export default function RegisterPage() {
 
             setAccessToken(response.access_token);
             setUser(response.user);
+            await saveRefreshToken(response.refresh_token);
+
             navigate("/");
         } catch (err) {
             if (err instanceof Error) {

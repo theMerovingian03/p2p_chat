@@ -2,6 +2,7 @@ import { login } from "../api/auth";
 import { useState } from "react";
 import { useAuthStore } from "../stores/authStore";
 import { Link, useNavigate } from "react-router-dom";
+import { saveRefreshToken } from "../stores/tokenStore";
 
 export default function LoginPage() {
     const setAccessToken = useAuthStore((state) => state.setAccessToken);
@@ -25,6 +26,7 @@ export default function LoginPage() {
 
             setAccessToken(response.access_token);
             setUser(response.user);
+            await saveRefreshToken(response.refresh_token);
 
             navigate("/");
         } catch (err) {
