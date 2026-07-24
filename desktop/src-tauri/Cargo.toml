@@ -35,7 +35,6 @@ thiserror.workspace = true
 dotenvy.workspace = true
 rand.workspace = true
 async-trait.workspace = true
-tauri-plugin-stronghold = "2"
 
 # Read the optimization guideline for more details: https://tauri.app/concept/size/#cargo-configuration
 [profile.release]

@@ -6,7 +6,6 @@
     "npm:@tauri-apps/api@2": "2.11.1",
     "npm:@tauri-apps/cli@2": "2.11.4",
     "npm:@tauri-apps/plugin-opener@2": "2.5.4",
-    "npm:@tauri-apps/plugin-stronghold@~2.3.1": "2.3.1",
     "npm:@types/react-dom@^19.1.6": "19.2.3_@types+react@19.2.17",
     "npm:@types/react@^19.1.8": "19.2.17",
     "npm:@vitejs/plugin-react@^6.0.2": "6.0.3_vite@8.1.4",
@@ -337,12 +336,6 @@
         "@tauri-apps/api"
       ]
     },
-    "@tauri-apps/plugin-stronghold@2.3.1": {
-      "integrity": "sha512-zFbD1Apk/VFdWaoGaoKcouRrZnzLFiNY9b1KDeBaN47sMaMHRYIa+ZDhvbzMOyH314+OHCQBXfe8I/ph59Lp9g==",
-      "dependencies": [
-        "@tauri-apps/api"
-      ]
-    },
     "@tybys/wasm-util@0.10.3": {
       "integrity": "sha512-F3fo1MYrRJYL3zER0OUOmkutjr1Vp23m7OsSgp7nq4SP6OqX6C/56XFIPAl5bt3zaBRjmW7SGz3u/6LwFpYcOg==",
       "dependencies": [
@@ -624,7 +617,6 @@
         "npm:@tauri-apps/api@2",
         "npm:@tauri-apps/cli@2",
         "npm:@tauri-apps/plugin-opener@2",
-        "npm:@tauri-apps/plugin-stronghold@~2.3.1",
         "npm:@types/react-dom@^19.1.6",
         "npm:@types/react@^19.1.8",
         "npm:@vitejs/plugin-react@^6.0.2",
