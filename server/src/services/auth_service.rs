@@ -152,10 +152,10 @@ pub async fn service_refresh_session(
         &config.jwt_expiration_hours,
     )?;
 
-    debug!("generating new refresh token");
+    // debug!("generating new refresh token");
     let refresh_token =
         rotate_refresh_token(session.id, db, &config.refresh_expiration_hours).await?;
-    debug!("Refresh token generated successfully!");
+    // debug!("Refresh token generated successfully!");
     Ok(RefreshSessionResponse {
         access_token,
         refresh_token,

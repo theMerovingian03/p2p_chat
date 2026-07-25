@@ -12,7 +12,8 @@
   "app": {
     "windows": [
       {
-        "title": "desktop",
+        "title": "P2P Chat",
+        "decorations": false,
         "width": 800,
         "height": 600
       }
