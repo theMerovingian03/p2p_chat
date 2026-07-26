@@ -1,21 +1,31 @@
 import { useAuthStore } from "../stores/authStore";
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { loadRefreshToken } from "../stores/tokenStore";
 
 export default function HomePage() {
     const user = useAuthStore((state) => state.user);
+    const logout = useAuthStore((state) => state.logout);
     const [refToken, setRefToken] = useState("")
     const [error, setError] = useState("");
+    const navigate = useNavigate();
 
     async function showRefreshToken() {
-        // e.preventDefault()
         try {
             let refreshToken = await loadRefreshToken();
             setRefToken(refreshToken);
         } catch (err) {
-            // setError(er)
+            setError("An error occured!");
             console.error("Load refresh token failed:", err);
+        }
+    }
+
+    async function handleLogOut() {
+        try {
+            logout();
+            navigate("/login", { replace: true });
+        } catch (err) {
+            console.error("Failed to delete refresh token!", err);
         }
     }
 
@@ -40,9 +50,16 @@ export default function HomePage() {
                             Use a guest account.
                         </Link>
                     </p>
-                    <button onClick={showRefreshToken} className="mt-3 w-50 rounded-2xl border-1 p-2.5 text-center transition-colors duration-200 hover:bg-white hover:text-blue-900">
-                        Show refresh token
-                    </button>
+                    <div className="flex justify-around p-2 w-full">
+
+                        <button onClick={showRefreshToken} className="m-3 w-50 rounded-2xl border-1 p-2.5 text-center transition-colors duration-200 hover:bg-white hover:text-blue-900">
+                            Show refresh token
+                        </button>
+
+                        <button onClick={handleLogOut} className="m-3 w-50 rounded-2xl border-1 p-2.5 text-center transition-colors duration-200 hover:bg-white hover:text-blue-900">
+                            Log Out
+                        </button>
+                    </div>
                     {error && <p>{error}</p>}
                 </div>
             </div>

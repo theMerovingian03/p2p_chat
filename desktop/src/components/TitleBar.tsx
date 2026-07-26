@@ -9,7 +9,7 @@ export default function TitleBar() {
             data-tauri-drag-region
             className="flex group absolute justify-end top-0 left-0 right-0 h-10 z-50"
         >
-            {/* <span className="text-white">P2P Chat</span> */}
+            {/* <span className="text-white m-2 opacity-0 hover:opacity-100 duration-200">P2P Chat</span> */}
             <div className="flex items-center mr-1 gap-1 opacity-0 transition-all duration-200 group-hover:opacity-100">
                 <button
                     onClick={() => appWindow.minimize()}

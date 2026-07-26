@@ -5,6 +5,7 @@ import GuestLoginPage from "./pages/GuestLogin";
 import HomePage from "./pages/Home";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import TitleBar from "./components/TitleBar";
+import Footer from "./components/Footer";
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
           <Route path="/guest" element={<GuestLoginPage />} />
         </Routes>
       </BrowserRouter>
+      <Footer />
     </>
   );
 }

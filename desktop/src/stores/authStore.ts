@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import type { UserDto } from "../generated/bindings";
+import { deleteRefreshToken } from "./tokenStore";
 
 interface AuthState {
     accessToken: string | null;
@@ -23,9 +24,12 @@ export const useAuthStore = create<AuthState>((set) => ({
             user,
         }),
 
-    logout: () =>
+    logout: async () => {
+        await deleteRefreshToken()
+
         set({
             accessToken: null,
             user: null,
-        }),
+        });
+    }
 }));
