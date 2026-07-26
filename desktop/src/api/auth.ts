@@ -1,5 +1,5 @@
 import { api } from "./client";
-import type { RegisterRequest, AuthResponse, LoginRequest } from "../generated/bindings";
+import type { RegisterRequest, AuthResponse, LoginRequest, RefreshSessionRequest, RefreshSessionResponse } from "../generated/bindings";
 
 export async function register(
     request: RegisterRequest,
@@ -23,10 +23,19 @@ export async function login(
     );
 }
 
-export async function guest_login(): Promise<AuthResponse> {
+export async function guestLogin(): Promise<AuthResponse> {
     return api<AuthResponse>(
         "/auth/guest", {
         method: "POST"
+    }
+    );
+}
+
+export async function refreshSession(request: RefreshSessionRequest): Promise<RefreshSessionResponse> {
+    return api<RefreshSessionResponse>(
+        "/auth/refresh", {
+        method: "POST",
+        body: JSON.stringify(request)
     }
     );
 }

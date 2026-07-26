@@ -36,7 +36,7 @@ export default function RegisterPage() {
             setUser(response.user);
             await saveRefreshToken(response.refresh_token);
 
-            navigate("/");
+            navigate("/home");
         } catch (err) {
             if (err instanceof Error) {
                 setError(err.message);

@@ -2,13 +2,17 @@ import { useAuthStore } from "../stores/authStore";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { loadRefreshToken } from "../stores/tokenStore";
+import { useEffect } from "react";
+import me from "../api/user";
 
 export default function HomePage() {
-    const user = useAuthStore((state) => state.user);
+    // const user = useAuthStore((state) => state.user);
     const logout = useAuthStore((state) => state.logout);
     const [refToken, setRefToken] = useState("")
     const [error, setError] = useState("");
     const navigate = useNavigate();
+    const user = useAuthStore((state) => state.user);
+    const setUser = useAuthStore((state) => state.setUser);
 
     async function showRefreshToken() {
         try {
@@ -28,6 +32,21 @@ export default function HomePage() {
             console.error("Failed to delete refresh token!", err);
         }
     }
+
+    useEffect(() => {
+        async function loadUser() {
+            try {
+                const currentUser = await me();
+                setUser(currentUser);
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        if (!user) {
+            loadUser();
+        }
+    }, [user, setUser]);
 
     return (
         <main>

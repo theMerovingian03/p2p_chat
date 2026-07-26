@@ -1,4 +1,4 @@
-import { guest_login } from '../api/auth';
+import { guestLogin } from '../api/auth';
 import { useState } from 'react';
 import { useAuthStore } from '../stores/authStore';
 import { Link, useNavigate } from 'react-router-dom';
@@ -17,13 +17,13 @@ export default function GuestLoginPage() {
         setLoading(true);
 
         try {
-            const response = await guest_login();
+            const response = await guestLogin();
 
             setAccessToken(response.access_token);
             setUser(response.user);
             await saveRefreshToken(response.refresh_token);
 
-            navigate("/");
+            navigate("/home");
         } catch (err) {
             if (err instanceof Error) {
                 setError(err.message);

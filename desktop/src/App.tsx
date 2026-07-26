@@ -2,6 +2,7 @@ import "./App.css";
 import RegisterPage from "./pages/Register";
 import LoginPage from "./pages/Login";
 import GuestLoginPage from "./pages/GuestLogin";
+import LoadingPage from "./pages/LoadingPage";
 import HomePage from "./pages/Home";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import TitleBar from "./components/TitleBar";
@@ -13,7 +14,8 @@ function App() {
       <TitleBar />
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<HomePage />} />
+          <Route path="/" element={<LoadingPage />} />
+          <Route path="/home" element={<HomePage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/login" element={< LoginPage />} />
           <Route path="/guest" element={<GuestLoginPage />} />
