@@ -1,3 +1,5 @@
 /target
 /temp
-.env
+
+# ignore .env, .env.development and .env.production
+.env* 

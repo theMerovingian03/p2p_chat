@@ -33,3 +33,7 @@ OR
 * ```deno task dev```
 
 Edit ```desktop/src/deno.json``` to implement additional tasks.
+
+### Server Deployment
+1. Build docker image: ```docker build -t p2p-chat-server .```
+2. Run: ```docker run -p 8080:8080 --env-file .env p2p-chat-server ```

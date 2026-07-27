@@ -8,6 +8,8 @@ mod routes;
 mod services;
 mod state;
 
+use crate::middleware::auth::auth_middleware;
+use crate::services::user_service::guest_cleanup_task;
 use axum::{
     Router,
     http::{
@@ -27,7 +29,9 @@ use tower_http::cors::CorsLayer;
 use tower_http::trace::TraceLayer;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
-use crate::middleware::auth::auth_middleware;
+async fn health() -> &'static str {
+    "OK"
+}
 
 #[tokio::main]
 async fn main() {
@@ -44,11 +48,16 @@ async fn main() {
         .connect(&conf.database_url)
         .await
         .expect("Failed to connect to Database");
+    // Cleanup Task
+    tokio::spawn(guest_cleanup_task(pool.clone()));
     // State
     let state = AppState {
         config: conf,
         db_pool: pool,
     };
+
+    let public_routes = Router::new().route("/health", get(health));
+
     // Register auth routes
     let auth_routes = Router::new()
         .route("/auth/register", post(register_user))
@@ -71,6 +80,7 @@ async fn main() {
         .allow_headers([CONTENT_TYPE, AUTHORIZATION]);
     // Main app
     let app = Router::new()
+        .merge(public_routes)
         .merge(auth_routes)
         .merge(protected_routes)
         .with_state(state)
@@ -78,7 +88,7 @@ async fn main() {
         .layer(TraceLayer::new_for_http());
 
     // Bind listener to host:port
-    let listener = TcpListener::bind("0.0.0.0:3000").await.unwrap();
+    let listener = TcpListener::bind("0.0.0.0:8080").await.unwrap();
     // Serve app on listener
     axum::serve(listener, app).await.unwrap();
 }
