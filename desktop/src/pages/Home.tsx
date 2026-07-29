@@ -7,6 +7,8 @@ import me from "../api/user";
 import FriendList from "../components/HomeComponents/FriendSidebarComponents/FriendList"
 import FriendToggleButton from "../components/HomeComponents/FriendSidebarComponents/FriendToggle"
 import UserInfoBox from "../components/UserComponents/UserInfoBox";
+import SearchBar from "../components/HomeComponents/SearchBar";
+import CommonButton from "../components/HomeComponents/CommonButtons";
 
 export default function HomePage() {
     const logout = useAuthStore((state) => state.logout);
@@ -43,21 +45,22 @@ export default function HomePage() {
     return (
         <main>
             <div className="items-center">
-                <div className="flex min-h-screen items-center justify-center">
+                <div className="m-3 flex min-h-screen items-start justify-center">
                     <div className="m-5 flex w-full">
                         {/* Left sidebar */}
-                        <div className="min-h-full w-1/3 border border-red-500 p-2">
+                        <div className="min-h-full w-1/3 p-2">
                             <FriendToggleButton />
                             <FriendList />
                         </div>
                         {/* Search bar + center portion */}
-                        <div className="flex min-h-full w-1/2 flex-col gap-10 border-2 border-yellow-500"></div>
+                        <div className="flex min-h-full w-1/2 flex-col gap-10">
+                            <SearchBar />
+                        </div>
                         {/* Right sidebar for settings, logout, etc */}
-                        <div className="flex flex-col min-h-full w-1/4 border-2 p-2">
+                        <div className="flex flex-col min-h-full w-1/4 p-2">
                             <UserInfoBox user={user} />
-                            <button onClick={handleLogOut} className="mt-2 w-full border-white text-white rounded-2xl border p-2.5 text-center transition-colors duration-200 hover:bg-white hover:text-blue-900">
-                                Log Out
-                            </button>
+                            <CommonButton>Change Alias</CommonButton>
+                            <CommonButton onClick={handleLogOut}>Log Out</CommonButton>
                             {error && <p>{error}</p>}
                         </div>
                     </div>
