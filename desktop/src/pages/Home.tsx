@@ -1,34 +1,26 @@
 import { useAuthStore } from "../stores/authStore";
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { loadRefreshToken } from "../stores/tokenStore";
+import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import me from "../api/user";
 
+import FriendList from "../components/HomeComponents/FriendSidebarComponents/FriendList"
+import FriendToggleButton from "../components/HomeComponents/FriendSidebarComponents/FriendToggle"
+import UserInfoBox from "../components/UserComponents/UserInfoBox";
+
 export default function HomePage() {
-    // const user = useAuthStore((state) => state.user);
     const logout = useAuthStore((state) => state.logout);
-    const [refToken, setRefToken] = useState("")
     const [error, setError] = useState("");
     const navigate = useNavigate();
     const user = useAuthStore((state) => state.user);
     const setUser = useAuthStore((state) => state.setUser);
-
-    async function showRefreshToken() {
-        try {
-            let refreshToken = await loadRefreshToken();
-            setRefToken(refreshToken);
-        } catch (err) {
-            setError("An error occured!");
-            console.error("Load refresh token failed:", err);
-        }
-    }
 
     async function handleLogOut() {
         try {
             logout();
             navigate("/login", { replace: true });
         } catch (err) {
+            setError("An error occured!");
             console.error("Failed to delete refresh token!", err);
         }
     }
@@ -51,37 +43,26 @@ export default function HomePage() {
     return (
         <main>
             <div className="items-center">
-                <div className="flex flex-col min-h-screen items-center justify-center text-white">
-                    <h2 className="text-center">Currently logged in as:</h2>
-                    <ul className="text-s mt-2 list-disc pl-5">
-                        <li>Display Name: {user?.display_name}</li>
-                        <li>Username: {user?.username}</li>
-                        <li>Email: {user?.email}</li>
-                        <li>Refresh Token: {refToken}</li>
-                    </ul>
-                    <p className="text-center text-xs mt-2">
-                        Don't have an account?{" "}
-                        <Link to="/register" className="underline">
-                            Create one here
-                        </Link>{" "}
-                        OR{" "}
-                        <Link to="/guest" className="underline">
-                            Use a guest account.
-                        </Link>
-                    </p>
-                    <div className="flex justify-around p-2 w-full">
-
-                        <button onClick={showRefreshToken} className="m-3 w-50 rounded-2xl border-1 p-2.5 text-center transition-colors duration-200 hover:bg-white hover:text-blue-900">
-                            Show refresh token
-                        </button>
-
-                        <button onClick={handleLogOut} className="m-3 w-50 rounded-2xl border-1 p-2.5 text-center transition-colors duration-200 hover:bg-white hover:text-blue-900">
-                            Log Out
-                        </button>
+                <div className="flex min-h-screen items-center justify-center">
+                    <div className="m-5 flex w-full">
+                        {/* Left sidebar */}
+                        <div className="min-h-full w-1/3 border border-red-500 p-2">
+                            <FriendToggleButton />
+                            <FriendList />
+                        </div>
+                        {/* Search bar + center portion */}
+                        <div className="flex min-h-full w-1/2 flex-col gap-10 border-2 border-yellow-500"></div>
+                        {/* Right sidebar for settings, logout, etc */}
+                        <div className="flex flex-col min-h-full w-1/4 border-2 p-2">
+                            <UserInfoBox user={user} />
+                            <button onClick={handleLogOut} className="mt-2 w-full border-white text-white rounded-2xl border p-2.5 text-center transition-colors duration-200 hover:bg-white hover:text-blue-900">
+                                Log Out
+                            </button>
+                            {error && <p>{error}</p>}
+                        </div>
                     </div>
-                    {error && <p>{error}</p>}
                 </div>
             </div>
-        </main >
+        </main>
     )
 }

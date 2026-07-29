@@ -43,7 +43,7 @@ export default function GuestLoginPage() {
                         <div className="flex w-full flex-col">
                             <h2 className="mt-2 text-center">Guest Login</h2>
                             <div className="flex flex-col space-y-2 p-2 text-sm">
-                                <div className="rounded-tr-2xl border-t-1 border-r-1 p-2.5">
+                                <div className="rounded-tr-2xl border-t border-r p-2.5">
                                     <p>Create a temporary account now!</p>
                                     <ul className="text-s mt-2 list-disc pl-5">
                                         <li>Full access to chat and messaging features</li>
@@ -52,7 +52,7 @@ export default function GuestLoginPage() {
                                     </ul>
                                 </div>
                                 {error && <p>{error}</p>}
-                                <button type="submit" className='mt-3 w-full rounded-2xl border-1 p-2.5 text-center transition-colors duration-200 hover:bg-white hover:text-blue-900'>
+                                <button type="submit" className='mt-3 w-full rounded-2xl border p-2.5 text-center transition-colors duration-200 hover:bg-white hover:text-blue-900'>
                                     {loading ? "Getting temporary credentials..." : "Let's Go!"}
                                 </button>
                             </div>

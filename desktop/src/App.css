@@ -25,6 +25,15 @@ body {
     );
 }
 
+.no-scrollbar {
+  -ms-overflow-style: none; /* IE/Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Edge, Tauri */
+}
+
 /* background: #353589;
 background: linear-gradient(
     145deg,rgba(53, 53, 137, 1) 0%, 
