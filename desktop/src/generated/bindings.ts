@@ -38,3 +38,7 @@ export type UserSearchModel = {
 	email: string,
 	username: string,
 };
+
+export type UserSearchRequestModel = {
+	query: string,
+};
