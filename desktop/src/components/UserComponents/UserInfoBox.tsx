@@ -2,7 +2,7 @@ import { ProfileCardProps } from "./Props";
 
 export default function UserInfoBox({ user }: ProfileCardProps) {
     if (!user) {
-        return <p>Loading...</p>;
+        return <p className="text-white">Loading...</p>;
     }
     return (
         <div className="flex w-full flex-col gap-2 rounded-2xl border border-white p-3 text-white hover:bg-white/10">

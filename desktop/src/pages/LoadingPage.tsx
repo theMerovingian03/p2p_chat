@@ -27,6 +27,7 @@ export default function LoadingPage() {
             navigate("/home");
         } catch (err) {
             logout();
+            console.log(err)
             navigate("/login");
         }
     }

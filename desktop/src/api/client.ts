@@ -1,11 +1,14 @@
 import { env } from "../config/env";
 import { useAuthStore } from "../stores/authStore";
 
+interface ApiOptions extends RequestInit {
+    query?: Record<string, string | number | boolean | undefined>;
+}
+
 export async function api<T>(
     path: string,
-    options?: RequestInit
+    options?: ApiOptions
 ): Promise<T> {
-
     const token = useAuthStore.getState().accessToken;
     const headers = new Headers(options?.headers);
     headers.set("Content-Type", "application/json");
@@ -14,7 +17,17 @@ export async function api<T>(
         headers.set("Authorization", `Bearer ${token}`);
     }
 
-    const response = await fetch(`${env.apiUrl}${path}`, {
+    const url = new URL(path, env.apiUrl);
+
+    if (options?.query) {
+        for (const [key, value] of Object.entries(options.query)) {
+            if (value !== undefined) {
+                url.searchParams.set(key, String(value));
+            }
+        }
+    }
+
+    const response = await fetch(url, {
         ...options,
         headers,
     });

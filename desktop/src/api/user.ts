@@ -1,4 +1,4 @@
-import { UserDto } from "../generated/bindings";
+import { UserDto, UserSearchModel } from "../generated/bindings";
 import { api } from "./client";
 
 export default function me(): Promise<UserDto> {
@@ -6,5 +6,17 @@ export default function me(): Promise<UserDto> {
         "/user/me", {
         method: "GET"
     }
+    );
+}
+
+export async function searchUsers(query: string): Promise<UserSearchModel[]> {
+    return api<UserSearchModel[]>(
+        "/user/search",
+        {
+            method: "GET",
+            query: {
+                query,
+            },
+        }
     );
 }

@@ -7,7 +7,8 @@ import me from "../api/user";
 import FriendList from "../components/HomeComponents/FriendSidebarComponents/FriendList"
 import FriendToggleButton from "../components/HomeComponents/FriendSidebarComponents/FriendToggle"
 import UserInfoBox from "../components/UserComponents/UserInfoBox";
-import SearchBar from "../components/HomeComponents/SearchBar";
+import SearchBar from "../components/HomeComponents/FriendSearchComponents/SearchBar";
+import SearchResultList from "../components/HomeComponents/FriendSearchComponents/SearchResultList";
 import CommonButton from "../components/HomeComponents/CommonButtons";
 
 export default function HomePage() {
@@ -33,6 +34,7 @@ export default function HomePage() {
                 const currentUser = await me();
                 setUser(currentUser);
             } catch (err) {
+                setError("An error occured!");
                 console.error(err);
             }
         }
@@ -53,15 +55,16 @@ export default function HomePage() {
                             <FriendList />
                         </div>
                         {/* Search bar + center portion */}
-                        <div className="flex min-h-full w-1/2 flex-col gap-10">
+                        <div className="flex w-1/2 flex-col gap-2 p-2">
                             <SearchBar />
+                            <SearchResultList />
                         </div>
                         {/* Right sidebar for settings, logout, etc */}
-                        <div className="flex flex-col min-h-full w-1/4 p-2">
-                            <UserInfoBox user={user} />
+                        <div className="flex min-h-full w-1/4 flex-col p-2">
+                            {!error && user && <UserInfoBox user={user} />}
                             <CommonButton>Change Alias</CommonButton>
                             <CommonButton onClick={handleLogOut}>Log Out</CommonButton>
-                            {error && <p>{error}</p>}
+                            {error && <p className="text-white m-2">{error}</p>}
                         </div>
                     </div>
                 </div>
