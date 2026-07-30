@@ -66,13 +66,13 @@ async fn main() {
         .route("/auth/refresh", post(refresh_session));
 
     // TODO: Register protected routes
-    let protected_routes =
-        Router::new()
-            .route("/me", get(me))
-            .layer(axum_middleware::from_fn_with_state(
-                state.clone(),
-                auth_middleware,
-            ));
+    let protected_routes = Router::new()
+        .route("/user/me", get(me))
+        .route("/user/search", get(search_user))
+        .layer(axum_middleware::from_fn_with_state(
+            state.clone(),
+            auth_middleware,
+        ));
     // Setup CORS
     let cors = CorsLayer::new()
         .allow_origin(HeaderValue::from_str(&client_url).unwrap())

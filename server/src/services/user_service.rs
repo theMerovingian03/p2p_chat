@@ -1,5 +1,9 @@
 use crate::repositories::user_repository::*;
-use shared::models::auth_models::UserDto;
+use axum::extract::Extension;
+use shared::models::{
+    auth_models::UserDto,
+    user_models::{UserSearchModel, UserSearchRequestModel},
+};
 use sqlx::PgPool;
 use tokio::time::{Duration, interval};
 use uuid::Uuid;
@@ -11,6 +15,15 @@ pub async fn service_me(db: &PgPool, id: &Uuid) -> Result<UserDto, AppError> {
         .await?
         .ok_or_else(|| AppError::NotFound("User not found!".into()))?;
     Ok(user.into())
+}
+
+pub async fn service_search_user(
+    db: &PgPool,
+    current_user: Uuid,
+    request: UserSearchRequestModel,
+) -> Result<Vec<UserSearchModel>, AppError> {
+    let searches = search_user(db, current_user, &request.query).await?;
+    Ok(searches)
 }
 
 pub async fn guest_cleanup_task(db: PgPool) {

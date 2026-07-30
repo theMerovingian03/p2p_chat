@@ -32,3 +32,9 @@ export type UserDto = {
 	email: string,
 	display_name: string,
 };
+
+export type UserSearchModel = {
+	id: string,
+	email: string,
+	username: string,
+};
