@@ -6,3 +6,8 @@ use uuid::Uuid;
 pub struct CreateFriendReqRequest {
     pub receiver_id: Uuid,
 }
+
+#[derive(Serialize, Deserialize, Type)]
+pub struct AcceptReqRequest {
+    pub request_id: Uuid,
+}
