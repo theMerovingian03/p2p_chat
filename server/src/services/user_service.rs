@@ -1,5 +1,4 @@
 use crate::repositories::user_repository::*;
-use axum::extract::Extension;
 use shared::models::{
     auth_models::UserDto,
     user_models::{UserSearchModel, UserSearchRequestModel},
