@@ -7,7 +7,7 @@ export async function createFriendRequest(
     return api<CreateFriendReqRequest>(
         "/friend/create_request", {
         method: "POST",
-        body: JSON.stringify(request),
+        body: JSON.stringify(request)
     }
     );
 }
