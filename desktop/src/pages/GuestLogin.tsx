@@ -52,7 +52,7 @@ export default function GuestLoginPage() {
                                     </ul>
                                 </div>
                                 {error && <p>{error}</p>}
-                                <button type="submit" className='border-white/20 mt-3 w-full rounded-sm border p-2.5 text-center transition-colors duration-200 hover:bg-white/10 cursor-pointer'>
+                                <button type="submit" className='border-white/20 mt-3 w-full rounded-sm border p-2.5 text-center transition-colors duration-200 hover:bg-white/10 cursor-pointer shadow-md'>
                                     {loading ? "Getting temporary credentials..." : "Let's Go!"}
                                 </button>
                             </div>

@@ -57,8 +57,8 @@ export default function LoginPage() {
 
                                 {error && <p>{error}</p>}
 
-                                <button type="submit" className="mt-3 w-full rounded-sm border p-2.5 text-center transition-colors duration-200 hover:bg-white/10 border-white/20 cursor-pointer" disabled={loading}>
-                                    {loading ? "Logging in..." : "Log In"}
+                                <button type="submit" className="mt-3 w-full rounded-sm border p-2.5 text-center transition-colors duration-200 hover:bg-white/10 border-white/20 cursor-pointer shadow-md" disabled={loading}>
+                                    {loading ? "Logging in..." : "Let's Go!"}
                                 </button>
                             </div>
                         </div>
