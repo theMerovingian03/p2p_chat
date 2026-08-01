@@ -13,6 +13,14 @@ input:-webkit-autofill:active {
 input[type="password"]::-ms-reveal {
     filter: invert(1);
 }
+input[type="search"]::-webkit-search-cancel-button {
+    appearance: none;
+    -webkit-appearance: none;
+}
+input[type="search"]::-webkit-search-decoration {
+    appearance: none;
+    -webkit-appearance: none;
+}
 html,
 body,
 #root {

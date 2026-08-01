@@ -3,7 +3,6 @@ import SearchResult from "./SearchResult";
 
 export default function SearchResultList() {
     const results = useSearchStore((state) => state.results);
-    console.log(results);
 
     if (results.length === 0) {
         console.log("No results!")
