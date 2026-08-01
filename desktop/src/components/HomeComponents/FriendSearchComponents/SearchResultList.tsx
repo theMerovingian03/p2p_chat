@@ -10,7 +10,7 @@ export default function SearchResultList() {
     }
 
     return (
-        <div className="no-scrollbar max-h-40 overflow-y-auto scroll-smooth rounded-2xl border border-white text-sm">
+        <div className="no-scrollbar max-h-40 overflow-y-auto scroll-smooth rounded-sm border border-white/20 text-sm">
             {results.map((user) => (
                 <SearchResult key={user.id} user={user} />
             ))}

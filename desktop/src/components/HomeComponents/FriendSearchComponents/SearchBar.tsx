@@ -33,7 +33,7 @@ export default function SearchBar() {
                 onChange={(e) => setQuery(e.target.value)}
                 onKeyDown={handleKeyDown}
                 placeholder="Enter username/email..."
-                className="w-full rounded-2xl border border-white bg-transparent py-2 pl-10 pr-10 text-white placeholder:text-white/40 transition-colors duration-200 hover:bg-white/10 focus:outline-none"
+                className="w-full rounded-sm border border-white/20 bg-transparent py-2 pl-10 pr-10 text-white placeholder:text-white/40 transition-colors duration-200 hover:bg-white/10 focus:outline-none"
             />
 
             {query && (

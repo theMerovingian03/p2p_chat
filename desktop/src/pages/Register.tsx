@@ -58,24 +58,24 @@ export default function RegisterPage() {
                             <div className="flex flex-col space-y-2 p-2 text-sm">
 
                                 <label htmlFor="email">Email</label>
-                                <input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required className="rounded-bl-2xl border-b border-l p-1 pb-2 pl-2 focus:outline-0" />
+                                <input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required className="rounded-bl-sm border-b border-l p-1 pb-2 pl-2 focus:outline-0 border-white/20" />
 
                                 <label htmlFor="username">Username</label>
-                                <input id="username" className="rounded-bl-2xl border-b border-l p-1 pb-2 pl-2 focus:outline-0" value={username} onChange={(e) => setUsername(e.target.value)} required />
+                                <input id="username" className="rounded-bl-sm border-b border-l p-1 pb-2 pl-2 focus:outline-0 border-white/20" value={username} onChange={(e) => setUsername(e.target.value)} required />
 
                                 <label htmlFor="displayName">Display Name</label>
-                                <input id="displayName" className="rounded-bl-2xl border-b border-l p-1 pb-2 pl-2 focus:outline-0" value={display_name} onChange={(e) => setDisplayName(e.target.value)} required />
+                                <input id="displayName" className="rounded-bl-sm border-b border-l p-1 pb-2 pl-2 focus:outline-0 border-white/20" value={display_name} onChange={(e) => setDisplayName(e.target.value)} required />
 
 
                                 <label htmlFor="password">Password</label>
-                                <input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required className="rounded-bl-2xl border-b border-l p-1 pb-2 pl-2 focus:outline-0" />
+                                <input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required className="rounded-bl-sm border-b border-l p-1 pb-2 pl-2 focus:outline-0 border-white/20" />
 
                                 <label htmlFor="confirmPassword">Confirm Password</label>
-                                <input id="confirmPassword" type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required className="rounded-bl-2xl border-b border-l p-1 pb-2 pl-2 focus:outline-0" />
+                                <input id="confirmPassword" type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required className="rounded-bl-sm border-b border-l p-1 pb-2 pl-2 focus:outline-0 border-white/20" />
 
                                 {error && <p>{error}</p>}
 
-                                <button type="submit" className="mt-3 w-full rounded-2xl border p-2.5 text-center transition-colors duration-200 hover:bg-white hover:text-blue-900" disabled={loading}>
+                                <button type="submit" className="mt-3 w-full rounded-sm border p-2.5 text-center transition-colors duration-200 hover:bg-white/10 border-white/20 cursor-pointer" disabled={loading}>
                                     {loading ? "Creating account..." : "Register"}
                                 </button>
                             </div>

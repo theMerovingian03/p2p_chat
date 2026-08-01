@@ -9,7 +9,7 @@ type Props = {
 };
 
 const baseClass =
-    "cursor-pointer mt-2 w-full border-white text-white rounded-2xl border p-2.5 text-center transition-colors duration-200 hover:bg-white hover:text-blue-900";
+    "cursor-pointer mt-2 w-full border-white/20 text-white rounded-sm border p-2.5 text-center transition-colors duration-200 hover:bg-white/10";
 
 export default function CommonButton({
     children,
