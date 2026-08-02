@@ -1,10 +1,9 @@
+use crate::models::friend_model::FriendRequestType;
+use shared::models::friend_models::FriendRequestRowDto;
 use sqlx::PgPool;
 use uuid::Uuid;
 
-use crate::{
-    errors::AppError,
-    repositories::friend_repository::{accept_friend_request, create_friend_request},
-};
+use crate::{errors::AppError, repositories::friend_repository::*};
 
 pub async fn service_create_friend_request(
     db: &PgPool,
@@ -27,4 +26,16 @@ pub async fn service_accept_friend_request(
 ) -> Result<(), AppError> {
     accept_friend_request(db, request_id, current_user_id).await?;
     Ok(())
+}
+
+pub async fn service_get_friend_requests(
+    db: &PgPool,
+    current_user_id: Uuid,
+    request_type: FriendRequestType,
+) -> Result<Vec<FriendRequestRowDto>, AppError> {
+    let friend_requests = match request_type {
+        FriendRequestType::Sent => get_sent_friend_requests(db, current_user_id).await?,
+        FriendRequestType::Received => get_received_friend_requests(db, current_user_id).await?,
+    };
+    Ok(friend_requests)
 }

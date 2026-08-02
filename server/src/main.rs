@@ -8,11 +8,9 @@ mod routes;
 mod services;
 mod state;
 
+use crate::routes::friend_routes::get_sent_friend_requests;
 use crate::services::user_service::guest_cleanup_task;
-use crate::{
-    middleware::auth::auth_middleware,
-    routes::friend_routes::{accept_friend_request, create_friend_request},
-};
+use crate::{middleware::auth::auth_middleware, routes::friend_routes::*};
 use axum::{
     Router,
     http::{
@@ -74,6 +72,8 @@ async fn main() {
         .route("/user/search", get(search_user))
         .route("/friend/create_request", post(create_friend_request))
         .route("/friend/accept_request", post(accept_friend_request))
+        .route("/friend/sent", get(get_sent_friend_requests))
+        .route("/friend/received", get(get_received_friend_requests))
         .layer(axum_middleware::from_fn_with_state(
             state.clone(),
             auth_middleware,

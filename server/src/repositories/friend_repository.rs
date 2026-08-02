@@ -1,5 +1,6 @@
 use crate::errors::AppError;
-use crate::models::friend_model::FriendRequestRow;
+use crate::models::friend_model::{FriendRequestRow, FriendRequestRowInternal};
+use shared::models::friend_models::FriendRequestRowDto;
 use sqlx::PgPool;
 use uuid::Uuid;
 
@@ -35,7 +36,7 @@ pub async fn accept_friend_request(
     current_user_id: Uuid,
 ) -> Result<(), AppError> {
     let mut tx = db.begin().await?;
-    let request = sqlx::query_as::<_, FriendRequestRow>(
+    let request = sqlx::query_as::<_, FriendRequestRowInternal>(
         r#"
             SELECT sender_id, receiver_id
             FROM friend_requests
@@ -78,4 +79,72 @@ pub async fn accept_friend_request(
     tx.commit().await?;
 
     Ok(())
+}
+
+pub async fn get_sent_friend_requests(
+    db: &PgPool,
+    current_user_id: Uuid,
+) -> Result<Vec<FriendRequestRowDto>, sqlx::Error> {
+    let results = sqlx::query_as::<_, FriendRequestRow>(
+        r#"
+            SELECT fr.id,
+            u.username,
+            fr.created_at
+
+            FROM friend_requests fr
+            JOIN users u
+            
+            ON u.id = fr.receiver_id
+            WHERE fr.sender_id = $1
+            ORDER BY fr.created_at DESC
+        "#,
+    )
+    .bind(current_user_id)
+    .fetch_all(db)
+    .await?;
+
+    let friend_requests = results
+        .into_iter()
+        .map(|req| FriendRequestRowDto {
+            id: req.id,
+            username: req.username,
+            created_at: req.created_at,
+        })
+        .collect();
+
+    Ok(friend_requests)
+}
+
+pub async fn get_received_friend_requests(
+    db: &PgPool,
+    current_user_id: Uuid,
+) -> Result<Vec<FriendRequestRowDto>, sqlx::Error> {
+    let results = sqlx::query_as::<_, FriendRequestRow>(
+        r#"
+            SELECT fr.id,
+            u.username,
+            fr.created_at
+
+            FROM friend_requests fr
+            JOIN users u
+            
+            ON u.id = fr.sender_id
+            WHERE fr.receiver_id = $1
+            ORDER BY fr.created_at DESC
+        "#,
+    )
+    .bind(current_user_id)
+    .fetch_all(db)
+    .await?;
+
+    let friend_requests = results
+        .into_iter()
+        .map(|req| FriendRequestRowDto {
+            id: req.id,
+            username: req.username,
+            created_at: req.created_at,
+        })
+        .collect();
+
+    Ok(friend_requests)
 }
