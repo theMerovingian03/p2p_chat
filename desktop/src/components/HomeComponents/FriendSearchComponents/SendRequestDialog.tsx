@@ -41,7 +41,7 @@ export default function SendFriendRequestDialog({ username, userId, onClose }: S
     return (
         <div className="flex w-80 flex-col rounded-sm border border-white/20 bg-white/10 text-white backdrop-blur-md
         shadow-xl">
-            <span className="m-2">{username} is not in your contacts. Add as friend? {userId}</span>
+            <span className="m-2">{username} is not in your contacts. Add as friend?</span>
             <div className="m-2 flex gap-5">
                 <button
                     disabled={loading || success}
