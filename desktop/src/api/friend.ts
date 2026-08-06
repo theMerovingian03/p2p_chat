@@ -23,16 +23,16 @@ export async function acceptFriendRequest(
     );
 }
 
-export async function getSentFriendRequests() {
-    return api<FriendRequestRowDto>(
+export async function getSentFriendRequests(): Promise<FriendRequestRowDto[]> {
+    return api<FriendRequestRowDto[]>(
         "/friend/sent", {
         "method": "GET"
     }
     );
 }
 
-export async function getReceivedFriendRequests() {
-    return api<FriendRequestRowDto>(
+export async function getReceivedFriendRequests(): Promise<FriendRequestRowDto[]> {
+    return api<FriendRequestRowDto[]>(
         "/friend/received", {
         "method": "GET"
     }

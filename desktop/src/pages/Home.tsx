@@ -1,11 +1,10 @@
 import { useAuthStore } from "../stores/authStore";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useEffect } from "react";
 import me from "../api/user";
 
-import FriendList from "../components/HomeComponents/FriendSidebarComponents/FriendList"
-import FriendToggleButton from "../components/HomeComponents/FriendSidebarComponents/FriendToggle"
+import FriendList from "../components/HomeComponents/FriendSidebarComponents/FriendList";
+import FriendToggleButton from "../components/HomeComponents/FriendSidebarComponents/FriendToggle";
 import UserInfoBox from "../components/UserComponents/UserInfoBox";
 import SearchBar from "../components/HomeComponents/FriendSearchComponents/SearchBar";
 import SearchResultList from "../components/HomeComponents/FriendSearchComponents/SearchResultList";
@@ -14,6 +13,7 @@ import CommonButton from "../components/HomeComponents/CommonButtons";
 export default function HomePage() {
     const logout = useAuthStore((state) => state.logout);
     const [error, setError] = useState("");
+    const [viewMode, setViewMode] = useState<"friends" | "requests">("friends");
     const navigate = useNavigate();
     const user = useAuthStore((state) => state.user);
     const setUser = useAuthStore((state) => state.setUser);
@@ -51,8 +51,11 @@ export default function HomePage() {
                     <div className="m-5 flex w-full">
                         {/* Left sidebar */}
                         <div className="min-h-full w-1/3 p-2">
-                            <FriendToggleButton />
-                            <FriendList />
+                            <FriendToggleButton
+                                activeView={viewMode}
+                                onChange={(view) => setViewMode(view)}
+                            />
+                            <FriendList view={viewMode} />
                         </div>
                         {/* Search bar + center portion */}
                         <div className="flex w-1/2 flex-col gap-2 p-2">

@@ -1,32 +1,50 @@
-import FriendBox from "./FriendBox";
+﻿import FriendBox from "./FriendBox";
+import RequestBox from "./RequestBox";
 import { useEffect, useState } from "react";
-import { FriendRowDto } from "../../../generated/bindings";
-import { getFriends } from "../../../api/friend";
+import { FriendRequestRowDto, FriendRowDto } from "../../../generated/bindings";
+import { getFriends, getSentFriendRequests } from "../../../api/friend";
 import Spinner from "../../Spinner";
 
-export default function FriendList() {
+type FriendListProps = {
+    view: "friends" | "requests";
+};
+
+export default function FriendList({ view }: FriendListProps) {
     const [friends, setFriends] = useState<FriendRowDto[]>([]);
+    const [requests, setRequests] = useState<FriendRequestRowDto[]>([]);
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
-        void handleGetFriends();
-    }, []);
+        void handleLoadData();
+    }, [view]);
 
-    async function handleGetFriends() {
+    async function handleLoadData() {
         setLoading(true);
         setError("");
 
         try {
-            const friend_list = await getFriends();
-            setFriends(friend_list ?? []);
+            if (view === "requests") {
+                const sentRequests = await getSentFriendRequests();
+                setRequests(sentRequests ?? []);
+                setFriends([]);
+            } else {
+                const friendList = await getFriends();
+                setFriends(friendList ?? []);
+                setRequests([]);
+            }
         } catch (err) {
             console.error(err);
-            setError("Unable to load friends.");
+            setError("Unable to load data.");
         } finally {
             setLoading(false);
         }
     }
+
+    const emptyMessage =
+        view === "requests"
+            ? "You have not sent any friend requests yet."
+            : "Could not find active contacts. Try using the search bar to find friends.";
 
     return (
         <div className="no-scrollbar max-h-140 w-full flex-col overflow-y-auto rounded-b-sm border border-white/20 scroll-smooth">
@@ -36,8 +54,20 @@ export default function FriendList() {
                 </div>
             ) : error ? (
                 <div className="p-4 text-sm text-red-400">{error}</div>
+            ) : view === "requests" ? (
+                requests.length === 0 ? (
+                    <div className="p-4 text-sm text-white/70">{emptyMessage}</div>
+                ) : (
+                    requests.map((request) => (
+                        <RequestBox
+                            key={request.id}
+                            username={request.username}
+                            createdAt={request.created_at}
+                        />
+                    ))
+                )
             ) : friends.length === 0 ? (
-                <div className="p-4 text-sm text-white/70">Could not find active contacts Try using the search bar to find friends.</div>
+                <div className="p-4 text-sm text-white/70">{emptyMessage}</div>
             ) : (
                 friends.map((friend) => (
                     <FriendBox key={friend.friend_id} username={friend.username} />
