@@ -13,6 +13,10 @@ export type CreateFriendReqRequest = {
 	receiver_id: string,
 };
 
+export type DeleteReqRequest = {
+	request_id: string,
+};
+
 export type FriendRequestRowDto = {
 	id: string,
 	username: string,

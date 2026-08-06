@@ -5,6 +5,7 @@ import me from "../api/user";
 
 import FriendList from "../components/HomeComponents/FriendSidebarComponents/FriendList";
 import FriendToggleButton from "../components/HomeComponents/FriendSidebarComponents/FriendToggle";
+import IncomingFriendRequests from "../components/HomeComponents/IncomingFriendRequests";
 import UserInfoBox from "../components/UserComponents/UserInfoBox";
 import SearchBar from "../components/HomeComponents/FriendSearchComponents/SearchBar";
 import SearchResultList from "../components/HomeComponents/FriendSearchComponents/SearchResultList";
@@ -50,12 +51,16 @@ export default function HomePage() {
                 <div className="m-3 flex min-h-screen items-start justify-center">
                     <div className="m-5 flex w-full">
                         {/* Left sidebar */}
-                        <div className="min-h-full w-1/3 p-2">
+                        <div className="min-h-full w-1/3 p-2 gap-2">
                             <FriendToggleButton
                                 activeView={viewMode}
                                 onChange={(view) => setViewMode(view)}
                             />
-                            <FriendList view={viewMode} />
+                            <div className="flex flex-col gap-2">
+
+                                <FriendList view={viewMode} />
+                                <IncomingFriendRequests />
+                            </div>
                         </div>
                         {/* Search bar + center portion */}
                         <div className="flex w-1/2 flex-col gap-2 p-2">

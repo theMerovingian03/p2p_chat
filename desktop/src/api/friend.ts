@@ -1,5 +1,5 @@
-import { api } from "./client";
-import { AcceptReqRequest, CreateFriendReqRequest, FriendRequestRowDto, FriendRowDto } from "../generated/bindings";
+﻿import { api } from "./client";
+import { AcceptReqRequest, CreateFriendReqRequest, DeleteReqRequest, FriendRequestRowDto, FriendRowDto } from "../generated/bindings";
 
 export async function createFriendRequest(
     request: CreateFriendReqRequest
@@ -18,6 +18,17 @@ export async function acceptFriendRequest(
     return api<void>(
         "/friend/accept_request", {
         method: "POST",
+        body: JSON.stringify(request)
+    }
+    );
+}
+
+export async function deleteFriendRequest(
+    request: DeleteReqRequest
+) {
+    return api<void>(
+        "/friend/delete_request", {
+        method: "DELETE",
         body: JSON.stringify(request)
     }
     );

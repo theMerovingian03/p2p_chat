@@ -5,7 +5,7 @@ use crate::models::friend_model::FriendRequestType;
 use crate::services::friend_service::*;
 use crate::{errors::AppError, state::AppState};
 use shared::models::friend_models::{
-    AcceptReqRequest, CreateFriendReqRequest, FriendRequestRowDto, FriendRowDto,
+    AcceptReqRequest, CreateFriendReqRequest, DeleteReqRequest, FriendRequestRowDto, FriendRowDto,
 };
 
 #[axum::debug_handler]
@@ -25,6 +25,16 @@ pub async fn accept_friend_request(
     Json(request): Json<AcceptReqRequest>,
 ) -> Result<StatusCode, AppError> {
     service_accept_friend_request(&state.db_pool, user_id, request.request_id).await?;
+    Ok(StatusCode::NO_CONTENT)
+}
+
+#[axum::debug_handler]
+pub async fn delete_friend_request(
+    State(state): State<AppState>,
+    Extension(user_id): Extension<Uuid>,
+    Json(request): Json<DeleteReqRequest>,
+) -> Result<StatusCode, AppError> {
+    service_delete_friend_request(&state.db_pool, user_id, request.request_id).await?;
     Ok(StatusCode::NO_CONTENT)
 }
 

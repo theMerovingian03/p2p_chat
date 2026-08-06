@@ -28,6 +28,15 @@ pub async fn service_accept_friend_request(
     Ok(())
 }
 
+pub async fn service_delete_friend_request(
+    db: &PgPool,
+    current_user_id: Uuid,
+    request_id: Uuid,
+) -> Result<(), AppError> {
+    delete_friend_request(db, request_id, current_user_id).await?;
+    Ok(())
+}
+
 pub async fn service_get_friend_requests(
     db: &PgPool,
     current_user_id: Uuid,

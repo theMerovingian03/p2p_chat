@@ -14,6 +14,11 @@ pub struct AcceptReqRequest {
 }
 
 #[derive(Serialize, Deserialize, Type)]
+pub struct DeleteReqRequest {
+    pub request_id: Uuid,
+}
+
+#[derive(Serialize, Deserialize, Type)]
 pub struct FriendRequestRowDto {
     pub id: Uuid,
     pub username: String,

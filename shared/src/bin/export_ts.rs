@@ -17,6 +17,7 @@ pub fn main() {
         .register::<UserSearchModel>()
         .register::<CreateFriendReqRequest>()
         .register::<AcceptReqRequest>()
+        .register::<DeleteReqRequest>()
         .register::<FriendRequestRowDto>()
         .register::<FriendRowDto>()
         .register::<UserSearchRequestModel>()

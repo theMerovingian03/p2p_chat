@@ -83,6 +83,43 @@ pub async fn accept_friend_request(
     Ok(())
 }
 
+pub async fn delete_friend_request(
+    db: &PgPool,
+    request_id: Uuid,
+    current_user_id: Uuid,
+) -> Result<(), AppError> {
+    let request = sqlx::query_as::<_, FriendRequestRowInternal>(
+        r#"
+            SELECT sender_id, receiver_id
+            FROM friend_requests
+            WHERE id = $1
+        "#,
+    )
+    .bind(request_id)
+    .fetch_optional(db)
+    .await?;
+
+    let request = request.ok_or(AppError::NotFound(
+        "Could not find this friend request!".into(),
+    ))?;
+
+    if request.sender_id != current_user_id && request.receiver_id != current_user_id {
+        return Err(AppError::Forbidden);
+    }
+
+    sqlx::query!(
+        r#"
+        DELETE FROM friend_requests
+        WHERE id = $1
+        "#,
+        request_id
+    )
+    .execute(db)
+    .await?;
+
+    Ok(())
+}
+
 pub async fn get_sent_friend_requests(
     db: &PgPool,
     current_user_id: Uuid,

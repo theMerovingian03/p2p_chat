@@ -47,7 +47,7 @@ export default function FriendList({ view }: FriendListProps) {
             : "Could not find active contacts. Try using the search bar to find friends.";
 
     return (
-        <div className="no-scrollbar max-h-140 w-full flex-col overflow-y-auto rounded-b-sm border border-white/20 scroll-smooth">
+        <div className="no-scrollbar max-h-100 w-full flex-col overflow-y-auto rounded-b-sm border border-white/20 scroll-smooth">
             {loading ? (
                 <div className="flex items-center justify-center p-6">
                     <Spinner />
@@ -61,8 +61,10 @@ export default function FriendList({ view }: FriendListProps) {
                     requests.map((request) => (
                         <RequestBox
                             key={request.id}
+                            id={request.id}
                             username={request.username}
                             createdAt={request.created_at}
+                            onDelete={() => void handleLoadData()}
                         />
                     ))
                 )
