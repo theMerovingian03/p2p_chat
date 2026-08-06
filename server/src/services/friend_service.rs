@@ -1,5 +1,5 @@
 use crate::models::friend_model::FriendRequestType;
-use shared::models::friend_models::FriendRequestRowDto;
+use shared::models::friend_models::{FriendRequestRowDto, FriendRowDto};
 use sqlx::PgPool;
 use uuid::Uuid;
 
@@ -38,4 +38,12 @@ pub async fn service_get_friend_requests(
         FriendRequestType::Received => get_received_friend_requests(db, current_user_id).await?,
     };
     Ok(friend_requests)
+}
+
+pub async fn service_get_friends(
+    db: &PgPool,
+    current_user_id: Uuid,
+) -> Result<Vec<FriendRowDto>, AppError> {
+    let results = get_friends(db, current_user_id).await?;
+    Ok(results)
 }

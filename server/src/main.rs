@@ -70,6 +70,7 @@ async fn main() {
     let protected_routes = Router::new()
         .route("/user/me", get(me))
         .route("/user/search", get(search_user))
+        .route("/friend", get(get_friends))
         .route("/friend/create_request", post(create_friend_request))
         .route("/friend/accept_request", post(accept_friend_request))
         .route("/friend/sent", get(get_sent_friend_requests))

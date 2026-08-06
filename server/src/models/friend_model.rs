@@ -18,3 +18,10 @@ pub enum FriendRequestType {
     Sent,
     Received,
 }
+
+#[derive(sqlx::FromRow)]
+pub struct FriendRow {
+    pub friend_id: Uuid,
+    pub username: String,
+    pub display_name: String,
+}

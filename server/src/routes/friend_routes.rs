@@ -5,7 +5,7 @@ use crate::models::friend_model::FriendRequestType;
 use crate::services::friend_service::*;
 use crate::{errors::AppError, state::AppState};
 use shared::models::friend_models::{
-    AcceptReqRequest, CreateFriendReqRequest, FriendRequestRowDto,
+    AcceptReqRequest, CreateFriendReqRequest, FriendRequestRowDto, FriendRowDto,
 };
 
 #[axum::debug_handler]
@@ -45,5 +45,13 @@ pub async fn get_received_friend_requests(
 ) -> Result<(StatusCode, Json<Vec<FriendRequestRowDto>>), AppError> {
     let results =
         service_get_friend_requests(&state.db_pool, user_id, FriendRequestType::Received).await?;
+    Ok((StatusCode::OK, Json(results)))
+}
+
+pub async fn get_friends(
+    State(state): State<AppState>,
+    Extension(user_id): Extension<Uuid>,
+) -> Result<(StatusCode, Json<Vec<FriendRowDto>>), AppError> {
+    let results = service_get_friends(&state.db_pool, user_id).await?;
     Ok((StatusCode::OK, Json(results)))
 }

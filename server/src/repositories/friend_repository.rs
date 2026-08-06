@@ -1,6 +1,6 @@
 use crate::errors::AppError;
-use crate::models::friend_model::{FriendRequestRow, FriendRequestRowInternal};
-use shared::models::friend_models::FriendRequestRowDto;
+use crate::models::friend_model::{FriendRequestRow, FriendRequestRowInternal, FriendRow};
+use shared::models::friend_models::{FriendRequestRowDto, FriendRowDto};
 use sqlx::PgPool;
 use uuid::Uuid;
 
@@ -35,7 +35,9 @@ pub async fn accept_friend_request(
     request_id: Uuid,
     current_user_id: Uuid,
 ) -> Result<(), AppError> {
+    // Step 1: Create transaction
     let mut tx = db.begin().await?;
+    // Step 2: Find the specific request
     let request = sqlx::query_as::<_, FriendRequestRowInternal>(
         r#"
             SELECT sender_id, receiver_id
@@ -54,7 +56,7 @@ pub async fn accept_friend_request(
     if friend_request.receiver_id != current_user_id {
         return Err(AppError::Forbidden);
     }
-
+    // Step 3: Create an entry to record friendship
     sqlx::query!(
         r#"
         INSERT INTO friends (user_id, friend_id)
@@ -65,7 +67,7 @@ pub async fn accept_friend_request(
     )
     .execute(&mut *tx)
     .await?;
-
+    // Step 4: Delete friend request
     sqlx::query!(
         r#"
         DELETE FROM friend_requests
@@ -75,7 +77,7 @@ pub async fn accept_friend_request(
     )
     .execute(&mut *tx)
     .await?;
-
+    // Step 5: Commit transaction
     tx.commit().await?;
 
     Ok(())
@@ -147,4 +149,37 @@ pub async fn get_received_friend_requests(
         .collect();
 
     Ok(friend_requests)
+}
+
+pub async fn get_friends(
+    db: &PgPool,
+    current_user_id: Uuid,
+) -> Result<Vec<FriendRowDto>, sqlx::Error> {
+    let results = sqlx::query_as::<_, FriendRow>(
+        r#"
+        SELECT
+            CASE WHEN f.user_id = $1 THEN f.friend_id ELSE f.user_id END AS friend_id,
+            u.username,
+            u.display_name
+        FROM friends f
+        JOIN users u
+            ON u.id = CASE WHEN f.user_id = $1 THEN f.friend_id ELSE f.user_id END
+        WHERE $1 IN (f.user_id, f.friend_id)
+        ORDER BY u.username ASC
+    "#,
+    )
+    .bind(current_user_id)
+    .fetch_all(db)
+    .await?;
+
+    let friends = results
+        .into_iter()
+        .map(|row| FriendRowDto {
+            friend_id: row.friend_id,
+            username: row.username,
+            display_name: row.display_name,
+        })
+        .collect();
+
+    Ok(friends)
 }

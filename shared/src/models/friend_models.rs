@@ -19,3 +19,10 @@ pub struct FriendRequestRowDto {
     pub username: String,
     pub created_at: DateTime<Utc>,
 }
+
+#[derive(Serialize, Deserialize, Type)]
+pub struct FriendRowDto {
+    pub friend_id: Uuid,
+    pub username: String,
+    pub display_name: String,
+}
