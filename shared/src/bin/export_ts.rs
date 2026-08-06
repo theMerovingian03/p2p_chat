@@ -2,9 +2,7 @@ use shared::models::auth_models::{
     AuthResponse, LoginRequest, RefreshSessionRequest, RefreshSessionResponse, RegisterRequest,
     UserDto,
 };
-use shared::models::friend_models::{
-    AcceptReqRequest, CreateFriendReqRequest, FriendRequestRowDto,
-};
+use shared::models::friend_models::*;
 use shared::models::user_models::{UserSearchModel, UserSearchRequestModel};
 use specta::Types;
 use specta_typescript::Typescript;
@@ -20,6 +18,7 @@ pub fn main() {
         .register::<CreateFriendReqRequest>()
         .register::<AcceptReqRequest>()
         .register::<FriendRequestRowDto>()
+        .register::<FriendRowDto>()
         .register::<UserSearchRequestModel>()
         .register::<UserDto>();
 

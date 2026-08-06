@@ -1,5 +1,5 @@
 import { api } from "./client";
-import { AcceptReqRequest, CreateFriendReqRequest, FriendRequestRowDto } from "../generated/bindings";
+import { AcceptReqRequest, CreateFriendReqRequest, FriendRequestRowDto, FriendRowDto } from "../generated/bindings";
 
 export async function createFriendRequest(
     request: CreateFriendReqRequest
@@ -34,6 +34,14 @@ export async function getSentFriendRequests() {
 export async function getReceivedFriendRequests() {
     return api<FriendRequestRowDto>(
         "/friend/received", {
+        "method": "GET"
+    }
+    );
+}
+
+export async function getFriends() {
+    return api<FriendRowDto>(
+        "/friend", {
         "method": "GET"
     }
     );

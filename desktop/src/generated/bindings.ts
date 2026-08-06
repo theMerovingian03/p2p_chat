@@ -19,6 +19,12 @@ export type FriendRequestRowDto = {
 	created_at: string,
 };
 
+export type FriendRowDto = {
+	friend_id: string,
+	username: string,
+	display_name: string,
+};
+
 export type LoginRequest = {
 	identifier: string,
 	password: string,
