@@ -35,5 +35,8 @@ export async function api<T>(
     if (!response.ok) {
         throw new Error(await response.text());
     }
-    return response.json() as Promise<T>;
+
+    // Handle case where body is empty
+    const text = await response.text();
+    return text ? (JSON.parse(text) as T) : (undefined as T);
 }

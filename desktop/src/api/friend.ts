@@ -4,7 +4,7 @@ import { AcceptReqRequest, CreateFriendReqRequest, FriendRequestRowDto, FriendRo
 export async function createFriendRequest(
     request: CreateFriendReqRequest
 ) {
-    return api<CreateFriendReqRequest>(
+    return api<void>(
         "/friend/create_request", {
         method: "POST",
         body: JSON.stringify(request)
@@ -15,7 +15,7 @@ export async function createFriendRequest(
 export async function acceptFriendRequest(
     request: AcceptReqRequest
 ) {
-    return api<AcceptReqRequest>(
+    return api<void>(
         "/friend/accept_request", {
         method: "POST",
         body: JSON.stringify(request)
