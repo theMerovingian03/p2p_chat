@@ -39,8 +39,8 @@ export async function getReceivedFriendRequests() {
     );
 }
 
-export async function getFriends() {
-    return api<FriendRowDto>(
+export async function getFriends(): Promise<FriendRowDto[]> {
+    return api<FriendRowDto[]>(
         "/friend", {
         "method": "GET"
     }

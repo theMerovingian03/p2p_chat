@@ -5,7 +5,7 @@ export default function UserInfoBox({ user }: ProfileCardProps) {
         return <p className="text-white">Loading...</p>;
     }
     return (
-        <div className="flex w-full flex-col gap-2 rounded-sm border border-white/20 p-3 text-white hover:bg-white/10">
+        <div className="flex w-full transition-colors duration-200 flex-col gap-2 rounded-sm border border-white/20 p-3 text-white hover:bg-white/10">
             <span>Welcome, {user.username}</span>
             <span className="text-xs">Alias: {user.display_name}</span>
             <span className="text-xs">{user.email}</span>
