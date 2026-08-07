@@ -9,7 +9,8 @@ type RequestBoxProps = {
 };
 
 export default function IncomingFriendRequestBox({ id, username, createdAt, onAction }: RequestBoxProps) {
-    const [loading, setLoading] = useState(false);
+    const [loadingAccept, setLoadingAccept] = useState(false);
+    const [loadingDecline, setLoadingDecline] = useState(false);
     const [dialog, setDialog] = useState<{ visible: boolean; x: number; y: number }>({ visible: false, x: 0, y: 0 });
     const containerRef = useRef<HTMLDivElement | null>(null);
 
@@ -25,27 +26,27 @@ export default function IncomingFriendRequestBox({ id, username, createdAt, onAc
     }, []);
 
     async function handleAccept() {
-        setLoading(true);
+        setLoadingAccept(true);
         try {
             await acceptFriendRequest({ request_id: id });
             onAction?.();
         } catch (err) {
             console.error(err);
         } finally {
-            setLoading(false);
+            setLoadingAccept(false);
             setDialog({ visible: false, x: 0, y: 0 });
         }
     }
 
     async function handleDecline() {
-        setLoading(true);
+        setLoadingDecline(true);
         try {
             await deleteFriendRequest({ request_id: id });
             onAction?.();
         } catch (err) {
             console.error(err);
         } finally {
-            setLoading(false);
+            setLoadingDecline(false);
             setDialog({ visible: false, x: 0, y: 0 });
         }
     }
@@ -63,8 +64,8 @@ export default function IncomingFriendRequestBox({ id, username, createdAt, onAc
             {dialog.visible && (
                 <div className="fixed z-50" style={{ left: dialog.x, top: dialog.y }}>
                     <div className="w-32 rounded border border-white/20 text-sm bg-white/10 text-white backdrop-blur-md">
-                        <button onClick={handleAccept} disabled={loading} className="w-full p-2 text-left transition-colors duration-200 hover:bg-white hover:text-blue-900">{loading ? 'Accepting...' : 'Accept'}</button>
-                        <button onClick={handleDecline} disabled={loading} className="w-full p-2 text-left transition-colors duration-200 hover:bg-white hover:text-blue-900">{loading ? 'Declining...' : 'Decline'}</button>
+                        <button onClick={handleAccept} disabled={loadingAccept} className="w-full p-2 text-left transition-colors duration-200 hover:bg-white hover:text-blue-900">{loadingAccept ? 'Accepting...' : 'Accept'}</button>
+                        <button onClick={handleDecline} disabled={loadingDecline} className="w-full p-2 text-left transition-colors duration-200 hover:bg-white hover:text-blue-900">{loadingDecline ? 'Declining...' : 'Decline'}</button>
                     </div>
                 </div>
             )}

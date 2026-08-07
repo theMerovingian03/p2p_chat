@@ -6,7 +6,7 @@ import Spinner from "../Spinner";
 
 type IncomingFriendRequestsProps = {};
 
-export default function IncomingFriendRequests({}: IncomingFriendRequestsProps) {
+export default function IncomingFriendRequests({ }: IncomingFriendRequestsProps) {
     const [requests, setRequests] = useState<FriendRequestRowDto[]>([]);
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
@@ -31,28 +31,33 @@ export default function IncomingFriendRequests({}: IncomingFriendRequestsProps) 
     }
 
     return (
-        <div className="no-scrollbar max-h-140 w-full flex-col overflow-y-auto rounded-b-sm border border-white/20 scroll-smooth">
-            {loading ? (
-                <div className="flex items-center justify-center p-6">
-                    <Spinner />
-                </div>
-            ) : error ? (
-                <div className="p-4 text-sm text-red-400">{error}</div>
-            ) : requests.length === 0 ? (
-                <div className="p-4 text-sm text-white/70">
-                    You have no incoming friend requests.
-                </div>
-            ) : (
-                requests.map((request) => (
-                    <IncomingFriendRequestBox
-                        key={request.id}
-                        id={request.id}
-                        username={request.username}
-                        createdAt={request.created_at}
-                        onAction={() => void loadIncomingRequests()}
-                    />
-                ))
-            )}
+        <div>
+            <div className="w-full border border-white/20 p-2">
+                <span className="text-white">Incoming Friend Requests</span>
+            </div>
+            <div className="no-scrollbar max-h-35 w-full flex-col overflow-y-auto rounded-b-sm border border-white/20 scroll-smooth">
+                {loading ? (
+                    <div className="flex items-center justify-center p-6">
+                        <Spinner />
+                    </div>
+                ) : error ? (
+                    <div className="p-4 text-sm text-red-400">{error}</div>
+                ) : requests.length === 0 ? (
+                    <div className="p-4 text-sm text-white/70">
+                        You have no incoming friend requests.
+                    </div>
+                ) : (
+                    requests.map((request) => (
+                        <IncomingFriendRequestBox
+                            key={request.id}
+                            id={request.id}
+                            username={request.username}
+                            createdAt={request.created_at}
+                            onAction={() => void loadIncomingRequests()}
+                        />
+                    ))
+                )}
+            </div>
         </div>
     );
 }
