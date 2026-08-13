@@ -7,10 +7,14 @@ mod repositories;
 mod routes;
 mod services;
 mod state;
+mod utilities;
 
-use crate::routes::friend_routes::get_sent_friend_requests;
 use crate::services::user_service::guest_cleanup_task;
-use crate::{middleware::auth::auth_middleware, routes::friend_routes::*};
+use crate::utilities::connection_manager::ConnectionManager;
+use crate::{
+    middleware::auth::auth_middleware,
+    routes::{friend_routes::*, ws_routes::websocket_handler},
+};
 use axum::routing::delete;
 use axum::{
     Router,
@@ -26,6 +30,7 @@ use routes::auth_routes::*;
 use routes::user_routes::*;
 use sqlx::postgres::PgPoolOptions;
 use state::AppState;
+use std::sync::Arc;
 use tokio::net::TcpListener;
 use tower_http::cors::CorsLayer;
 use tower_http::trace::TraceLayer;
@@ -50,12 +55,15 @@ async fn main() {
         .connect(&conf.database_url)
         .await
         .expect("Failed to connect to Database");
+    // Websocket Connection manager
+    let connection_manager = Arc::new(ConnectionManager::new());
     // Cleanup Task
     tokio::spawn(guest_cleanup_task(pool.clone()));
     // State
     let state = AppState {
         config: conf,
         db_pool: pool,
+        connection_manager,
     };
 
     let public_routes = Router::new().route("/health", get(health));
@@ -65,7 +73,8 @@ async fn main() {
         .route("/auth/register", post(register_user))
         .route("/auth/login", post(login_user))
         .route("/auth/guest", post(create_guest_user))
-        .route("/auth/refresh", post(refresh_session));
+        .route("/auth/refresh", post(refresh_session))
+        .route("/ws", get(websocket_handler));
 
     // TODO: Register protected routes
     let protected_routes = Router::new()
@@ -79,6 +88,9 @@ async fn main() {
         .route("/friend/delete_request", delete(delete_friend_request))
         .route("/friend/sent", get(get_sent_friend_requests))
         .route("/friend/received", get(get_received_friend_requests))
+        // Websocket for chat requests
+        // Auth WS needs to be protected since it should allow only authenticated users to get a ws token
+        .route("/auth/ws", post(get_ws_token))
         .layer(axum_middleware::from_fn_with_state(
             state.clone(),
             auth_middleware,

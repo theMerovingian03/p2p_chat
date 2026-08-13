@@ -4,6 +4,7 @@ use axum::{
     response::{IntoResponse, Response},
 };
 use serde::Serialize;
+use shared::models::websocket_models::ServerEvent;
 use thiserror::Error;
 
 #[derive(Debug, Error)]
@@ -68,4 +69,13 @@ impl IntoResponse for AppError {
 
         (status, body).into_response()
     }
+}
+
+#[derive(thiserror::Error, Debug)]
+pub enum ConnectionError {
+    #[error("user is not connected!")]
+    NotConnected,
+
+    #[error("failed to send event: {0}")]
+    Send(#[from] tokio::sync::mpsc::error::SendError<ServerEvent>),
 }

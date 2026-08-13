@@ -188,6 +188,7 @@ pub async fn get_received_friend_requests(
     Ok(friend_requests)
 }
 
+// TODO: Add pagination
 pub async fn get_friends(
     db: &PgPool,
     current_user_id: Uuid,
@@ -219,4 +220,25 @@ pub async fn get_friends(
         .collect();
 
     Ok(friends)
+}
+
+pub async fn are_friends(db: &PgPool, user_id: Uuid, receiver_user_id: Uuid) -> bool {
+    sqlx::query_scalar(
+        r#"
+        SELECT EXISTS(
+            SELECT 1
+            FROM friends
+            WHERE
+                (user_id = $1 AND friend_id = $2)
+                OR
+                (user_id = $2 AND friend_id = $1)
+        )
+        "#,
+    )
+    .persistent(false)
+    .bind(user_id)
+    .bind(receiver_user_id)
+    .fetch_one(db)
+    .await
+    .unwrap_or(false)
 }

@@ -2,6 +2,7 @@ use crate::auth::jwt::*;
 use crate::auth::password::*;
 use crate::auth::refresh_token::decode_refresh_token;
 use crate::config::Config;
+use crate::models::claims_model::WsClaims;
 use crate::repositories::auth_repository::*;
 use crate::repositories::session_repository::*;
 use chrono::Utc;
@@ -9,10 +10,12 @@ use names::{Generator, Name};
 use rand::{RngExt, distr::Alphanumeric};
 use shared::models::auth_models::RefreshSessionRequest;
 use shared::models::auth_models::RefreshSessionResponse;
+use shared::models::auth_models::WsAuth;
 use shared::models::auth_models::{AuthResponse, LoginRequest, RegisterRequest};
 use sqlx::PgPool;
 
 use tracing::debug;
+use uuid::Uuid;
 
 use crate::errors::AppError;
 
@@ -160,4 +163,21 @@ pub async fn service_refresh_session(
         access_token,
         refresh_token,
     })
+}
+
+pub fn service_get_ws_token(user_id: Uuid, config: &Config) -> Result<WsAuth, AppError> {
+    let ws_token = create_ws_token(
+        user_id,
+        &config.jwt_secret,
+        &config.ws_token_expiration_minutes,
+    )?;
+    Ok(WsAuth { ws_token })
+}
+
+pub fn service_verify_ws_token(token: &str, config: &Config) -> Result<WsClaims, AppError> {
+    let claims = verify_ws_token(token, &config.jwt_secret)?;
+    if claims.token_type != "ws_token" {
+        return Err(AppError::Unauthorized);
+    }
+    Ok(claims)
 }

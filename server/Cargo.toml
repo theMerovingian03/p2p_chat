@@ -21,7 +21,7 @@ dotenvy.workspace = true
 rand.workspace = true
 
 # Web
-axum = { version = "0.8.9", features = ["macros"] }
+axum = { version = "0.8.9", features = ["macros", "ws"] }
 
 # Database
 sqlx = { version = "0.9.0", features = [
@@ -47,6 +47,13 @@ tower-http = { version = "0.6", features = ["trace", "cors"] }
 
 # Random name generator
 names = "0.14.0"
+
+# Reference counted hashmap for Websocket connection manager
+dashmap = "6.2.1"
+
+# Websocket futures
+futures = "0.3.34"
+futures-util = "0.3.33"
 
 # Encoding
 sha2 = "0.11.0"

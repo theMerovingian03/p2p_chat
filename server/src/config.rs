@@ -6,7 +6,8 @@ use thiserror::Error;
 pub struct Config {
     pub database_url: String,
     pub jwt_secret: String,
-    pub jwt_expiration_hours: i64,
+    pub jwt_expiration_hours: i64,        // used by REST endpoints
+    pub ws_token_expiration_minutes: i64, // used by WS auth
     pub refresh_expiration_hours: i64,
     pub client_url: String,
 }
@@ -28,6 +29,7 @@ impl Config {
             database_url: env::var("DATABASE_URL")?,
             jwt_secret: env::var("JWT_SECRET")?,
             jwt_expiration_hours: env::var("JWT_EXPIRATION_HOURS")?.parse()?,
+            ws_token_expiration_minutes: env::var("WS_TOKEN_EXPIRATION_MINUTES")?.parse()?,
             refresh_expiration_hours: env::var("REFRESH_EXPIRATION_HOURS")?.parse()?,
             client_url: env::var("CLIENT_BASE_URL")?,
         })

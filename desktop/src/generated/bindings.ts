@@ -9,6 +9,8 @@ export type AuthResponse = {
 	user: UserDto,
 };
 
+export type ClientEvent = { type: "RequestFriendPresences"; friend_list: string[] } | { type: "ChatRequestSend"; to: string } | { type: "ChatRequestAccept"; from: string } | { type: "WebRtcOffer"; to: string; sdp: string } | { type: "WebRtcAnswer"; to: string; sdp: string } | { type: "IceCandidate"; to: string; candidate: string };
+
 export type CreateFriendReqRequest = {
 	receiver_id: string,
 };
@@ -50,6 +52,8 @@ export type RegisterRequest = {
 	display_name: string,
 };
 
+export type ServerEvent = { type: "ChatRequestIncoming"; from: string } | { type: "ChatRequestAccepted"; from: string } | { type: "PresenceOnline"; id: string } | { type: "PresenceOffline"; id: string } | { type: "WebRtcOffer"; from: string; sdp: string } | { type: "WebRtcAnswer"; from: string; sdp: string } | { type: "IceCandidate"; from: string; candidate: string } | { type: "Error"; code: WsErrorCode; message: string } | { type: "GenericMessage"; message: string };
+
 export type UserDto = {
 	id: string,
 	username: string,
@@ -66,3 +70,9 @@ export type UserSearchModel = {
 export type UserSearchRequestModel = {
 	query: string,
 };
+
+export type WsAuth = {
+	ws_token: string,
+};
+
+export type WsErrorCode = { type: "UserNotFound" } | { type: "UserOffline" } | { type: "NotFriends" } | { type: "RequestAlreadyExists" } | { type: "Unauthorized" } | { type: "InvalidRequest" };

@@ -31,6 +31,11 @@ pub struct AuthResponse {
     pub user: UserDto,
 }
 
+#[derive(Debug, Serialize, Type, Deserialize)]
+pub struct WsAuth {
+    pub ws_token: String,
+}
+
 #[derive(Debug, Serialize, Deserialize, Type)]
 pub struct RefreshSessionRequest {
     pub refresh_token: String,
