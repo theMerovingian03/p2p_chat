@@ -34,7 +34,8 @@ use std::sync::Arc;
 use tokio::net::TcpListener;
 use tower_http::cors::CorsLayer;
 use tower_http::trace::TraceLayer;
-use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
+use tracing_subscriber::EnvFilter;
+// use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
 async fn health() -> &'static str {
     "OK"
@@ -43,8 +44,8 @@ async fn health() -> &'static str {
 #[tokio::main]
 async fn main() {
     // Initialize logging subscriber
-    tracing_subscriber::registry()
-        .with(tracing_subscriber::fmt::layer())
+    tracing_subscriber::fmt()
+        .with_env_filter(EnvFilter::new("server=debug,tokio_tungstenite=off"))
         .init();
     // Config
     let conf = Config::from_env().expect("Failed to load configuration");
