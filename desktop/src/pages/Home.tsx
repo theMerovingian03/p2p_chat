@@ -2,6 +2,7 @@ import { useAuthStore } from "../stores/authStore";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import me from "../api/user";
+// import { getWsToken } from "../api/auth";
 
 import FriendList from "../components/HomeComponents/FriendSidebarComponents/FriendList";
 import FriendToggleButton from "../components/HomeComponents/FriendSidebarComponents/FriendToggle";
@@ -14,6 +15,9 @@ import CommonButton from "../components/HomeComponents/CommonButtons";
 export default function HomePage() {
     const logout = useAuthStore((state) => state.logout);
     const [error, setError] = useState("");
+    // const [wsError, setWsError] = useState("");
+    // const [wsToken, setWsToken] = useState("");
+    // const [connectedToWs, setConnectedToWs] = useState(false);
     const [viewMode, setViewMode] = useState<"friends" | "requests">("friends");
     const navigate = useNavigate();
     const user = useAuthStore((state) => state.user);
@@ -29,20 +33,44 @@ export default function HomePage() {
         }
     }
 
-    useEffect(() => {
-        async function loadUser() {
-            try {
-                const currentUser = await me();
-                setUser(currentUser);
-            } catch (err) {
-                setError("An error occured!");
-                console.error(err);
-            }
+    async function loadUser() {
+        try {
+            const currentUser = await me();
+            setUser(currentUser);
+        } catch (err) {
+            setError("An error occured!");
+            console.error(err);
         }
+    }
 
+    // async function getWebsocketToken() {
+    //     try {
+    //         const response = await getWsToken()
+    //         setWsToken(response.ws_token);
+    //         setConnectedToWs(true);
+    //     } catch (err) {
+    //         setWsError("Error occured while establishing connection!");
+    //         console.error(err);
+    //     }
+    // }
+
+    // export async function connectWebSocket() {
+    //     const { ws_token } = await getWsToken();
+
+    //     websocketService.connect(
+    //         ws_token,
+    //         useWebSocketStore.getState().handleEvent,
+    //     );
+    // }
+
+    useEffect(() => {
         if (!user) {
             loadUser();
         }
+        // if (!connectedToWs) {
+        //     getWebsocketToken();
+        //     // TODO: Connect to WS, update dependency array
+        // }
     }, [user, setUser]);
 
     return (

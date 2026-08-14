@@ -1,5 +1,5 @@
 import { api } from "./client";
-import type { RegisterRequest, AuthResponse, LoginRequest, RefreshSessionRequest, RefreshSessionResponse } from "../generated/bindings";
+import type { RegisterRequest, AuthResponse, LoginRequest, RefreshSessionRequest, RefreshSessionResponse, WsAuth } from "../generated/bindings";
 
 export async function register(
     request: RegisterRequest,
@@ -36,6 +36,14 @@ export async function refreshSession(request: RefreshSessionRequest): Promise<Re
         "/auth/refresh", {
         method: "POST",
         body: JSON.stringify(request)
+    }
+    );
+}
+
+export async function getWsToken(): Promise<WsAuth> {
+    return api<WsAuth>(
+        "/auth/ws", {
+        method: "POST"
     }
     );
 }

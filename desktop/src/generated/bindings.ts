@@ -9,7 +9,7 @@ export type AuthResponse = {
 	user: UserDto,
 };
 
-export type ClientEvent = { type: "RequestFriendPresences"; friend_list: string[] } | { type: "ChatRequestSend"; to: string } | { type: "ChatRequestAccept"; from: string } | { type: "WebRtcOffer"; to: string; sdp: string } | { type: "WebRtcAnswer"; to: string; sdp: string } | { type: "IceCandidate"; to: string; candidate: string };
+export type ClientEvent = { type: "ChatRequestSend"; to: string } | { type: "ChatRequestAccept"; from: string } | { type: "WebRtcOffer"; to: string; sdp: string } | { type: "WebRtcAnswer"; to: string; sdp: string } | { type: "IceCandidate"; to: string; candidate: string };
 
 export type CreateFriendReqRequest = {
 	receiver_id: string,
@@ -75,4 +75,4 @@ export type WsAuth = {
 	ws_token: string,
 };
 
-export type WsErrorCode = { type: "UserNotFound" } | { type: "UserOffline" } | { type: "NotFriends" } | { type: "RequestAlreadyExists" } | { type: "Unauthorized" } | { type: "InvalidRequest" };
+export type WsErrorCode = { type: "UserNotFound" } | { type: "UserOffline" } | { type: "NotFriends" } | { type: "Unauthorized" } | { type: "InvalidRequest" };
