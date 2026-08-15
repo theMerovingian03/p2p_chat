@@ -1,16 +1,19 @@
 import { create } from "zustand";
 import type { ServerEvent } from "../generated/bindings";
 
+type WebsocketStatus = "connected" | "connecting" | "disconnected";
+
 // Create state which can be accessed through the store
 interface WebsocketState {
-    connected: boolean;
     onlineUserIds: Set<string>;
+    status: WebsocketStatus;
 
     handleEvent: (event: ServerEvent) => void;
+    setStatus: (status: WebsocketStatus) => void;
 }
 
 export const WebsocketStore = create<WebsocketState>((set) => ({
-    connected: false,
+    status: "disconnected",
     onlineUserIds: new Set<string>(),
 
     handleEvent: (event) => {
@@ -60,5 +63,9 @@ export const WebsocketStore = create<WebsocketState>((set) => ({
                 );
                 break;
         }
+    },
+
+    setStatus: (status) => {
+        set({ status });
     }
 }))

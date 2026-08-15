@@ -102,6 +102,7 @@ async fn main() {
         .allow_methods([Method::GET, Method::POST, Method::GET, Method::DELETE])
         .allow_headers([CONTENT_TYPE, AUTHORIZATION]);
     // Main app
+    // TODO: Add tracing debug logs
     let app = Router::new()
         .merge(public_routes)
         .merge(auth_routes)

@@ -1,8 +1,6 @@
 import { useAuthStore } from "../stores/authStore";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import me from "../api/user";
-// import { getWsToken } from "../api/auth";
 
 import FriendList from "../components/HomeComponents/FriendSidebarComponents/FriendList";
 import FriendToggleButton from "../components/HomeComponents/FriendSidebarComponents/FriendToggle";
@@ -11,17 +9,14 @@ import UserInfoBox from "../components/UserComponents/UserInfoBox";
 import SearchBar from "../components/HomeComponents/FriendSearchComponents/SearchBar";
 import SearchResultList from "../components/HomeComponents/FriendSearchComponents/SearchResultList";
 import CommonButton from "../components/HomeComponents/CommonButtons";
+import WsConnectionBox from "../components/UserComponents/WsConnectionBox";
 
 export default function HomePage() {
     const logout = useAuthStore((state) => state.logout);
     const [error, setError] = useState("");
-    // const [wsError, setWsError] = useState("");
-    // const [wsToken, setWsToken] = useState("");
-    // const [connectedToWs, setConnectedToWs] = useState(false);
     const [viewMode, setViewMode] = useState<"friends" | "requests">("friends");
     const navigate = useNavigate();
     const user = useAuthStore((state) => state.user);
-    const setUser = useAuthStore((state) => state.setUser);
 
     async function handleLogOut() {
         try {
@@ -32,46 +27,6 @@ export default function HomePage() {
             console.error("Failed to delete refresh token!", err);
         }
     }
-
-    async function loadUser() {
-        try {
-            const currentUser = await me();
-            setUser(currentUser);
-        } catch (err) {
-            setError("An error occured!");
-            console.error(err);
-        }
-    }
-
-    // async function getWebsocketToken() {
-    //     try {
-    //         const response = await getWsToken()
-    //         setWsToken(response.ws_token);
-    //         setConnectedToWs(true);
-    //     } catch (err) {
-    //         setWsError("Error occured while establishing connection!");
-    //         console.error(err);
-    //     }
-    // }
-
-    // export async function connectWebSocket() {
-    //     const { ws_token } = await getWsToken();
-
-    //     websocketService.connect(
-    //         ws_token,
-    //         useWebSocketStore.getState().handleEvent,
-    //     );
-    // }
-
-    useEffect(() => {
-        if (!user) {
-            loadUser();
-        }
-        // if (!connectedToWs) {
-        //     getWebsocketToken();
-        //     // TODO: Connect to WS, update dependency array
-        // }
-    }, [user, setUser]);
 
     return (
         <main>
@@ -96,8 +51,9 @@ export default function HomePage() {
                             <SearchResultList />
                         </div>
                         {/* Right sidebar for settings, logout, etc */}
-                        <div className="flex min-h-full w-1/4 flex-col p-2">
+                        <div className="flex min-h-full w-1/4 flex-col p-2 gap-2">
                             {!error && user && <UserInfoBox user={user} />}
+                            < WsConnectionBox />
                             <CommonButton>Change Alias</CommonButton>
                             <CommonButton onClick={handleLogOut}>Log Out</CommonButton>
                             {error && <p className="text-white m-2">{error}</p>}
