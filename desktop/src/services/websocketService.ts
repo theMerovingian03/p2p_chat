@@ -1,5 +1,5 @@
 import type { ClientEvent, ServerEvent } from "../generated/bindings";
-import { WebsocketStore } from "../stores/webSocketStore";
+import { useWebsocketStore } from "../stores/webSocketStore";
 import { env } from "../config/env";
 
 type ServerEventHandler = (event: ServerEvent) => void;
@@ -13,13 +13,13 @@ class WebsocketService {
     // Handles creating a websocket and callback methods
     connect(wsToken: string, onEvent: ServerEventHandler) {
         const url = `${env.wsUrl}?ws_token=${encodeURIComponent(wsToken)}`;
-        WebsocketStore.getState().setStatus("connecting");
+        useWebsocketStore.getState().setStatus("connecting");
         this.handler = onEvent;
         this.websocket = new WebSocket(url);
 
         this.websocket.onopen = () => {
             console.log("Websocket connected");
-            WebsocketStore.getState().setStatus("connected");
+            useWebsocketStore.getState().setStatus("connected");
         }
 
         this.websocket.onmessage = (message) => {
@@ -33,13 +33,13 @@ class WebsocketService {
 
         this.websocket.onclose = () => {
             console.log("Websocket disconnected!");
-            WebsocketStore.getState().setStatus("disconnected");
+            useWebsocketStore.getState().setStatus("disconnected");
             this.websocket = null;
         }
 
         this.websocket.onerror = (error) => {
             console.error("WebSocket error:", error);
-            WebsocketStore.getState().setStatus("disconnected");
+            useWebsocketStore.getState().setStatus("disconnected");
         };
     }
 
@@ -53,7 +53,7 @@ class WebsocketService {
     }
 
     disconnect() {
-        WebsocketStore.getState().setStatus("disconnected");
+        useWebsocketStore.getState().setStatus("disconnected");
         this.websocket?.close();
         this.websocket = null;
     }

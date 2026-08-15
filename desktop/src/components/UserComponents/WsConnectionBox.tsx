@@ -1,7 +1,7 @@
-import { WebsocketStore } from "../../stores/webSocketStore"
+import { useWebsocketStore } from "../../stores/webSocketStore"
 
 export default function WsConnectionBox() {
-    const status = WebsocketStore((state) => state.status);
+    const status = useWebsocketStore((state) => state.status);
 
     const statusConfig = {
         connecting: {

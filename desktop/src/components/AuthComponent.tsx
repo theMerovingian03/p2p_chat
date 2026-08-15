@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import Spinner from "./Spinner";
 import CommonButton from "./CommonButtons";
 import { useAuthStore } from "../stores/authStore";
-import { WebsocketStore } from "../stores/webSocketStore";
+import { useWebsocketStore } from "../stores/webSocketStore";
 import { getWsToken } from "../api/auth";
 import { webSocketService } from "../services/websocketService";
 import { useNavigate } from "react-router-dom";
@@ -14,7 +14,7 @@ export default function AuthComponent() {
     const navigate = useNavigate();
     const user = useAuthStore((state) => state.user);
     const setUser = useAuthStore((state) => state.setUser);
-    const handleEvent = WebsocketStore((state) => state.handleEvent);
+    const handleEvent = useWebsocketStore((state) => state.handleEvent);
 
     const [initializing, setInitializing] = useState(true);
     const [error, setError] = useState<string | null>(null);

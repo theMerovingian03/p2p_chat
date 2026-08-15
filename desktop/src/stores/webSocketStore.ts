@@ -12,7 +12,7 @@ interface WebsocketState {
     setStatus: (status: WebsocketStatus) => void;
 }
 
-export const WebsocketStore = create<WebsocketState>((set) => ({
+export const useWebsocketStore = create<WebsocketState>((set) => ({
     status: "disconnected",
     onlineUserIds: new Set<string>(),
 
