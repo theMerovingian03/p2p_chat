@@ -8,7 +8,7 @@ import IncomingFriendRequests from "../components/HomeComponents/IncomingFriendR
 import UserInfoBox from "../components/UserComponents/UserInfoBox";
 import SearchBar from "../components/HomeComponents/FriendSearchComponents/SearchBar";
 import SearchResultList from "../components/HomeComponents/FriendSearchComponents/SearchResultList";
-import CommonButton from "../components/HomeComponents/CommonButtons";
+import CommonButton from "../components/CommonButtons";
 import WsConnectionBox from "../components/UserComponents/WsConnectionBox";
 
 export default function HomePage() {

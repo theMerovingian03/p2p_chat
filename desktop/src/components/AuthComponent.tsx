@@ -1,19 +1,33 @@
 import { Outlet } from "react-router-dom";
 import { useEffect, useState } from "react";
 import Spinner from "./Spinner";
+import CommonButton from "./CommonButtons";
 import { useAuthStore } from "../stores/authStore";
 import { WebsocketStore } from "../stores/webSocketStore";
 import { getWsToken } from "../api/auth";
 import { webSocketService } from "../services/websocketService";
+import { useNavigate } from "react-router-dom";
 import me from "../api/user";
 
 export default function AuthComponent() {
+    const logout = useAuthStore((state) => state.logout);
+    const navigate = useNavigate();
     const user = useAuthStore((state) => state.user);
     const setUser = useAuthStore((state) => state.setUser);
     const handleEvent = WebsocketStore((state) => state.handleEvent);
 
     const [initializing, setInitializing] = useState(true);
     const [error, setError] = useState<string | null>(null);
+
+    async function handleLogOut() {
+        try {
+            logout();
+            navigate("/login", { replace: true });
+        } catch (err) {
+            setError("An error occured!");
+            console.error("Failed to delete refresh token!", err);
+        }
+    }
 
     useEffect(() => {
         let cancelled = false;
@@ -76,7 +90,10 @@ export default function AuthComponent() {
     if (error) {
         return (
             <div className="flex min-h-screen items-center justify-center text-white">
-                {error}
+                <div className="flex flex-col gap-2">
+                    <span>{error}</span>
+                    <CommonButton onClick={handleLogOut}>Retry Login</CommonButton>
+                </div>
             </div>
         );
     }
