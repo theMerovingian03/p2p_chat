@@ -10,6 +10,7 @@ import SearchBar from "../components/HomeComponents/FriendSearchComponents/Searc
 import SearchResultList from "../components/HomeComponents/FriendSearchComponents/SearchResultList";
 import CommonButton from "../components/CommonButtons";
 import WsConnectionBox from "../components/UserComponents/WsConnectionBox";
+import IncomingChatRequests from "../components/HomeComponents/IncomingChatRequests";
 
 export default function HomePage() {
     const logout = useAuthStore((state) => state.logout);
@@ -56,6 +57,7 @@ export default function HomePage() {
                             < WsConnectionBox />
                             <CommonButton>Change Alias</CommonButton>
                             <CommonButton onClick={handleLogOut}>Log Out</CommonButton>
+                            <IncomingChatRequests />
                             {error && <p className="text-white m-2">{error}</p>}
                         </div>
                     </div>

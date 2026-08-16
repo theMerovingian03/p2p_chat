@@ -3,18 +3,28 @@ import type { ServerEvent } from "../generated/bindings";
 
 type WebsocketStatus = "connected" | "connecting" | "disconnected";
 
+type IncomingChatRequest = {
+    id: string;
+    from: string;
+    createdAt: string;
+};
+
 // Create state which can be accessed through the store
 interface WebsocketState {
     onlineUserIds: Set<string>;
     status: WebsocketStatus;
+    incomingChatRequests: IncomingChatRequest[];
 
     handleEvent: (event: ServerEvent) => void;
     setStatus: (status: WebsocketStatus) => void;
+    addIncomingChatRequest: (from: string) => void;
+    removeIncomingChatRequest: (id: string) => void;
 }
 
 export const useWebsocketStore = create<WebsocketState>((set) => ({
     status: "disconnected",
     onlineUserIds: new Set<string>(),
+    incomingChatRequests: [],
 
     handleEvent: (event) => {
         switch (event.type) {
@@ -23,19 +33,37 @@ export const useWebsocketStore = create<WebsocketState>((set) => ({
                     const onlineUserIds = new Set(state.onlineUserIds);
                     onlineUserIds.add(event.id);
                     return { onlineUserIds };
-                })
+                });
                 break;
 
-            case "PresenceOffline": set((state) => {
-                const onlineUserIds = new Set(state.onlineUserIds);
-                onlineUserIds.delete(event.id);
-                return { onlineUserIds };
-            })
+            case "PresenceOffline":
+                set((state) => {
+                    const onlineUserIds = new Set(state.onlineUserIds);
+                    onlineUserIds.delete(event.id);
+                    return { onlineUserIds };
+                });
                 break;
 
-            case "ChatRequestIncoming":
-                console.log("Incoming chat request from: ", event.from);
+            case "ChatRequestIncoming": {
+                set((state) => {
+                    const exists = state.incomingChatRequests.some((request) => request.from === event.from);
+                    if (exists) {
+                        return state;
+                    }
+
+                    return {
+                        incomingChatRequests: [
+                            ...state.incomingChatRequests,
+                            {
+                                id: `${event.from}-${Date.now()}`,
+                                from: event.from,
+                                createdAt: new Date().toISOString(),
+                            },
+                        ],
+                    };
+                });
                 break;
+            }
 
             case "ChatRequestAccepted":
                 console.log("Your chat request was accepted by: ", event.from);
@@ -67,5 +95,24 @@ export const useWebsocketStore = create<WebsocketState>((set) => ({
 
     setStatus: (status) => {
         set({ status });
-    }
-}))
+    },
+
+    addIncomingChatRequest: (from) => {
+        set((state) => ({
+            incomingChatRequests: [
+                ...state.incomingChatRequests,
+                {
+                    id: `${from}-${Date.now()}`,
+                    from,
+                    createdAt: new Date().toISOString(),
+                },
+            ],
+        }));
+    },
+
+    removeIncomingChatRequest: (id) => {
+        set((state) => ({
+            incomingChatRequests: state.incomingChatRequests.filter((request) => request.id !== id),
+        }));
+    },
+}));
