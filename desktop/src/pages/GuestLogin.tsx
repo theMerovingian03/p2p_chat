@@ -48,7 +48,7 @@ export default function GuestLoginPage() {
                                     <ul className="text-s mt-2 list-disc pl-5">
                                         <li>Full access to chat and messaging features</li>
                                         <li>No email, password, or signup needed</li>
-                                        <li>Account automatically expires after 24 hours</li>
+                                        <li>Account is deleted permanently after 24 hours</li>
                                     </ul>
                                 </div>
                                 {error && <p>{error}</p>}

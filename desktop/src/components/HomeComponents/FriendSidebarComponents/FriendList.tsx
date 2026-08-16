@@ -47,7 +47,7 @@ export default function FriendList({ view }: FriendListProps) {
             : "Could not find active contacts. Try using the search bar to find friends.";
 
     return (
-        <div className="no-scrollbar max-h-100 w-full flex-col overflow-y-auto rounded-b-sm border border-white/20 scroll-smooth">
+        <div className="no-scrollbar max-h-85 w-full flex-col overflow-y-auto rounded-b-sm border border-white/20 scroll-smooth">
             {loading ? (
                 <div className="flex items-center justify-center p-6">
                     <Spinner />
@@ -72,7 +72,7 @@ export default function FriendList({ view }: FriendListProps) {
                 <div className="p-4 text-sm text-white/70">{emptyMessage}</div>
             ) : (
                 friends.map((friend) => (
-                    <FriendBox key={friend.friend_id} username={friend.username} />
+                    <FriendBox key={friend.friend_id} username={friend.username} userId={friend.friend_id} />
                 ))
             )}
         </div>

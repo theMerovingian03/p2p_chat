@@ -35,7 +35,7 @@ export default function IncomingFriendRequests({ }: IncomingFriendRequestsProps)
             <div className="w-full border border-white/20 p-2">
                 <span className="text-white">Incoming Friend Requests</span>
             </div>
-            <div className="no-scrollbar max-h-35 w-full flex-col overflow-y-auto rounded-b-sm border border-white/20 scroll-smooth">
+            <div className="no-scrollbar max-h-40 w-full flex-col overflow-y-auto rounded-b-sm border border-white/20 scroll-smooth">
                 {loading ? (
                     <div className="flex items-center justify-center p-6">
                         <Spinner />
