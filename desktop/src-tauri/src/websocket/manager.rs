@@ -30,7 +30,7 @@ impl WebSocketStatus {
 // Unbounded causes backpressure
 pub struct WebSocketManager {
     status: Arc<Mutex<WebSocketStatus>>,
-    sender: Arc<Mutex<Option<mpsc::UnboundedSender<ClientEvent>>>>,
+    sender: Arc<Mutex<Option<mpsc::Sender<ClientEvent>>>>,
     app_handle: Arc<Mutex<Option<tauri::AppHandle>>>,
 }
 
@@ -95,7 +95,7 @@ impl WebSocketManager {
 
                 // Split the stream into sender and receiver
                 let (write, read) = ws_stream.split();
-                let (tx, rx) = mpsc::unbounded_channel();
+                let (tx, rx) = mpsc::channel::<ClientEvent>(100);
 
                 // Store sender for sending messages
                 *self.sender.lock() = Some(tx);
@@ -142,19 +142,25 @@ impl WebSocketManager {
     }
 
     /// Send a client event to the server
-    pub fn send_event(&self, event: ClientEvent) -> Result<(), String> {
+    pub async fn send_event(&self, event: ClientEvent) -> Result<(), String> {
         if self.status() != WebSocketStatus::Connected {
             return Err("WebSocket not connected".to_string());
         }
 
-        if let Some(sender) = self.sender.lock().as_ref() {
-            sender
-                .send(event)
-                .map_err(|e| format!("Failed to send event: {}", e))?;
-            Ok(())
-        } else {
-            Err("WebSocket sender not available".to_string())
-        }
+        let sender = {
+            let guard = self.sender.lock();
+
+            guard
+                .clone()
+                .ok_or_else(|| "WebSocket sender not available".to_string())?
+        };
+
+        sender
+            .send(event)
+            .await
+            .map_err(|e| format!("Failed to send event: {}", e))?;
+
+        Ok(())
     }
 
     /// Disconnect from WebSocket server
@@ -237,7 +243,7 @@ async fn write_websocket_messages(
         >,
         Message,
     >,
-    mut rx: mpsc::UnboundedReceiver<ClientEvent>,
+    mut rx: mpsc::Receiver<ClientEvent>,
 ) {
     use futures_util::sink::SinkExt;
 
