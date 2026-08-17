@@ -16,7 +16,7 @@ export default function SendChatRequestDialog({ username, userId, onClose }: Sen
         try {
             setLoading(true);
             setError("");
-            sendChatRequest(userId);
+            await sendChatRequest(userId);
             setSuccess(true);
         } catch (err) {
             setError("An error occured!");

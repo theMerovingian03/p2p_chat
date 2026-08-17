@@ -1,3 +1,4 @@
+import { listen } from "@tauri-apps/api/event";
 import { create } from "zustand";
 import type { ServerEvent } from "../generated/bindings";
 
@@ -19,6 +20,7 @@ interface WebsocketState {
     setStatus: (status: WebsocketStatus) => void;
     addIncomingChatRequest: (from: string) => void;
     removeIncomingChatRequest: (id: string) => void;
+    initializeEventListeners: () => Promise<void>;
 }
 
 export const useWebsocketStore = create<WebsocketState>((set) => ({
@@ -114,5 +116,29 @@ export const useWebsocketStore = create<WebsocketState>((set) => ({
         set((state) => ({
             incomingChatRequests: state.incomingChatRequests.filter((request) => request.id !== id),
         }));
+    },
+
+    initializeEventListeners: async () => {
+        try {
+            // Listen for server events from Rust WebSocket manager
+            // target is ws-event
+            await listen<ServerEvent>("ws-event", (event) => {
+                useWebsocketStore.getState().handleEvent(event.payload);
+            });
+
+            // Listen for status changes from Rust WebSocket manager
+            await listen<{ status: WebsocketStatus }>(
+                "ws-status-changed",
+                (event) => {
+                    useWebsocketStore.getState().setStatus(event.payload.status);
+                }
+            );
+
+            // Listeners are active for the lifetime of the app.
+            // Uncomment below to store unlisten functions for cleanup if needed:
+            // return { _unlistenEvent, _unlistenStatus }
+        } catch (error) {
+            console.error("Failed to initialize WebSocket event listeners:", error);
+        }
     },
 }));

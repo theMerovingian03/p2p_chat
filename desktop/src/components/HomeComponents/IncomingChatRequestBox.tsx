@@ -30,7 +30,7 @@ export default function IncomingChatRequestBox({ id, username, createdAt, onActi
     async function handleAccept() {
         setLoadingAccept(true);
         try {
-            acceptChatRequest(username);
+            await acceptChatRequest(username);
             removeIncomingChatRequest(id);
             onAction?.();
         } catch (err) {

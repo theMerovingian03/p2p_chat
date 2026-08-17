@@ -8,13 +8,14 @@ import { getWsToken } from "../api/auth";
 import { webSocketService } from "../services/websocketService";
 import { useNavigate } from "react-router-dom";
 import me from "../api/user";
+import { env } from "../config/env";
 
 export default function AuthComponent() {
     const logout = useAuthStore((state) => state.logout);
     const navigate = useNavigate();
     const user = useAuthStore((state) => state.user);
     const setUser = useAuthStore((state) => state.setUser);
-    const handleEvent = useWebsocketStore((state) => state.handleEvent);
+    const initializeEventListeners = useWebsocketStore((state) => state.initializeEventListeners);
 
     const [initializing, setInitializing] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -34,6 +35,9 @@ export default function AuthComponent() {
 
         async function initialize() {
             try {
+                // Initialize event listeners to receive WebSocket events from Rust
+                await initializeEventListeners();
+
                 if (!user) {
                     console.log("Fetching user details");
                     const currentUser = await me();
@@ -50,12 +54,9 @@ export default function AuthComponent() {
 
                 if (cancelled) return;
 
-                // Establish ws connection.
+                // Establish ws connection through Tauri.
                 console.log("Attempting to connect WS");
-                webSocketService.connect(
-                    ws_token,
-                    handleEvent,
-                );
+                await webSocketService.connect(ws_token, env.wsUrl);
             } catch (error) {
                 if (cancelled) return;
 
@@ -72,9 +73,9 @@ export default function AuthComponent() {
 
         return () => {
             cancelled = true;
-            webSocketService.disconnect();
+            void webSocketService.disconnect();
         };
-    }, [handleEvent, setUser, user]);
+    }, [initializeEventListeners, setUser, user]);
 
     if (initializing) {
         return (

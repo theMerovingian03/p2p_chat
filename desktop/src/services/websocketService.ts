@@ -1,77 +1,98 @@
-import type { ClientEvent, ServerEvent } from "../generated/bindings";
-import { useWebsocketStore } from "../stores/webSocketStore";
-import { env } from "../config/env";
+import { invoke } from "@tauri-apps/api/core";
 
-type ServerEventHandler = (event: ServerEvent) => void;
-
-// Centralized wrapper for websocket functions
+/**
+ * Centralized wrapper for WebSocket functions.
+ * The actual WebSocket connection is managed in Rust via Tauri.
+ * This service provides high-level functions for React components.
+ */
 class WebsocketService {
-    private websocket: WebSocket | null = null;
-    private handler: ServerEventHandler | null = null;
-
-    // Wrapper for new Websocket
-    // Handles creating a websocket and callback methods
-    connect(wsToken: string, onEvent: ServerEventHandler) {
-        const url = `${env.wsUrl}?ws_token=${encodeURIComponent(wsToken)}`;
-        useWebsocketStore.getState().setStatus("connecting");
-        this.handler = onEvent;
-        this.websocket = new WebSocket(url);
-
-        this.websocket.onopen = () => {
-            console.log("Websocket connected");
-            useWebsocketStore.getState().setStatus("connected");
+    /**
+     * Connect to the WebSocket server
+     */
+    async connect(wsToken: string, wsUrl: string = "ws://localhost:8000/ws") {
+        try {
+            await invoke("connect_websocket", {
+                wsUrl,
+                wsToken,
+            });
+        } catch (error) {
+            console.error("Failed to connect WebSocket:", error);
+            throw error;
         }
-
-        this.websocket.onmessage = (message) => {
-            try {
-                const event = JSON.parse(message.data) as ServerEvent;
-                this.handler?.(event);
-            } catch (error) {
-                console.error("Invalid message type: ", error);
-            }
-        }
-
-        this.websocket.onclose = () => {
-            console.log("Websocket disconnected!");
-            useWebsocketStore.getState().setStatus("disconnected");
-            this.websocket = null;
-        }
-
-        this.websocket.onerror = (error) => {
-            console.error("WebSocket error:", error);
-            useWebsocketStore.getState().setStatus("disconnected");
-        };
     }
 
-    send(event: ClientEvent) {
-        if (!this.websocket || this.websocket.readyState != WebSocket.OPEN) {
-            console.error("Websocket is not connected!");
-            return;
+    /**
+     * Disconnect from the WebSocket server
+     */
+    async disconnect() {
+        try {
+            await invoke("disconnect_websocket");
+        } catch (error) {
+            console.error("Failed to disconnect WebSocket:", error);
+            throw error;
         }
-
-        this.websocket?.send(JSON.stringify(event));
     }
 
-    disconnect() {
-        useWebsocketStore.getState().setStatus("disconnected");
-        this.websocket?.close();
-        this.websocket = null;
+    /**
+     * Get current connection status
+     */
+    async getStatus(): Promise<string> {
+        try {
+            return await invoke("get_websocket_status");
+        } catch (error) {
+            console.error("Failed to get WebSocket status:", error);
+            throw error;
+        }
     }
 }
 
-export const webSocketService: WebsocketService = new WebsocketService();
+export const webSocketService = new WebsocketService();
 
-// Avoid manual reconstruction of JSON payload within components
-export function sendChatRequest(to: string) {
-    webSocketService.send({
-        type: "ChatRequestSend",
-        to
-    });
+/**
+ * High-level functions for common WebSocket operations
+ * These delegate to Rust-backed Tauri commands
+ */
+export async function sendChatRequest(to: string) {
+    try {
+        await invoke("send_chat_request", { to });
+    } catch (error) {
+        console.error("Failed to send chat request:", error);
+        throw error;
+    }
 }
 
-export function acceptChatRequest(from: string) {
-    webSocketService.send({
-        type: "ChatRequestAccept",
-        from
-    });
+export async function acceptChatRequest(from: string) {
+    try {
+        await invoke("accept_chat_request", { from });
+    } catch (error) {
+        console.error("Failed to accept chat request:", error);
+        throw error;
+    }
+}
+
+export async function sendWebRtcOffer(to: string, sdp: string) {
+    try {
+        await invoke("send_webrtc_offer", { to, sdp });
+    } catch (error) {
+        console.error("Failed to send WebRTC offer:", error);
+        throw error;
+    }
+}
+
+export async function sendWebRtcAnswer(to: string, sdp: string) {
+    try {
+        await invoke("send_webrtc_answer", { to, sdp });
+    } catch (error) {
+        console.error("Failed to send WebRTC answer:", error);
+        throw error;
+    }
+}
+
+export async function sendIceCandidate(to: string, candidate: string) {
+    try {
+        await invoke("send_ice_candidate", { to, candidate });
+    } catch (error) {
+        console.error("Failed to send ICE candidate:", error);
+        throw error;
+    }
 }
