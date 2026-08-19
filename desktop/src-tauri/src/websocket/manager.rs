@@ -1,3 +1,4 @@
+use futures_util::sink::SinkExt;
 use futures_util::StreamExt;
 use parking_lot::Mutex;
 use serde_json::{json, Value};
@@ -105,11 +106,7 @@ impl WebSocketManager {
                 let app_handle = Arc::clone(&self.app_handle);
 
                 // Task to read messages from server
-                let read_handle = tokio::spawn(read_websocket_messages(
-                    read,
-                    app_handle.clone(),
-                    status.clone(),
-                ));
+                let read_handle = tokio::spawn(read_websocket_messages(read, app_handle.clone()));
 
                 // Task to write messages to server
                 tokio::spawn(write_websocket_messages(write, rx));
@@ -186,7 +183,6 @@ async fn read_websocket_messages(
         >,
     >,
     app_handle: Arc<Mutex<Option<tauri::AppHandle>>>,
-    _status: Arc<Mutex<WebSocketStatus>>,
 ) {
     use futures_util::stream::StreamExt;
 
@@ -245,8 +241,6 @@ async fn write_websocket_messages(
     >,
     mut rx: mpsc::Receiver<ClientEvent>,
 ) {
-    use futures_util::sink::SinkExt;
-
     while let Some(event) = rx.recv().await {
         match serde_json::to_string(&event) {
             Ok(text) => {
