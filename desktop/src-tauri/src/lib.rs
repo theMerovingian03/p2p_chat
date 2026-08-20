@@ -1,6 +1,7 @@
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
 // mod token_store;
 mod commands;
+mod webrtc;
 mod websocket;
 
 use commands::auth::*;
