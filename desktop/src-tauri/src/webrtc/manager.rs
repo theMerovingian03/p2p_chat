@@ -4,8 +4,8 @@ use std::{collections::HashMap, sync::Arc};
 use tokio::sync::Mutex;
 use uuid::Uuid;
 use webrtc::peer_connection::{
-    PeerConnection, PeerConnectionBuilder, PeerConnectionEventHandler, RTCConfigurationBuilder,
-    RTCIceServer, RTCPeerConnectionIceEvent, RTCSessionDescription,
+    self, PeerConnection, PeerConnectionBuilder, PeerConnectionEventHandler,
+    RTCConfigurationBuilder, RTCIceServer, RTCPeerConnectionIceEvent, RTCSessionDescription,
 };
 
 #[derive(Clone)]
@@ -92,6 +92,18 @@ impl WebRtcManager {
                 sdp: answer.sdp,
             })
             .await?;
+        Ok(())
+    }
+
+    pub async fn handle_answer(&self, peer_id: Uuid, sdp: String) -> Result<(), String> {
+        let peers = self.peers.lock().await;
+        let pc = peers
+            .get(&peer_id)
+            .ok_or_else(|| "No peer found!".to_string())?;
+        let answer = RTCSessionDescription::answer(sdp).map_err(|e| e.to_string())?;
+        pc.set_local_description(answer)
+            .await
+            .map_err(|e| e.to_string())?;
         Ok(())
     }
 }
