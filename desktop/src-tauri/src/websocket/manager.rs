@@ -71,6 +71,7 @@ impl WebSocketManager {
 
     /// Connect to WebSocket server
     pub async fn connect(&self, ws_url: String, ws_token: String) {
+        // Drops the mutex guard before continuing
         let old_status = {
             let mut status = self.status.lock();
             let old = *status;
