@@ -132,19 +132,21 @@ pub async fn handle_client_event(
                 error!("Error occured while sending WebRtcAnswer: {}", error);
             }
         }
-        _ => {
-            let _ = connection_manager
-                // TODO: Handle send_to_user errors
+        ClientEvent::IceCandidate { to, candidate } => {
+            if let Err(error) = connection_manager
                 .send_to_user(
-                    &user_id,
-                    ServerEvent::GenericMessage {
-                        message: "Not implemented!".to_string(),
+                    &to,
+                    ServerEvent::IceCandidate {
+                        from: user_id,
+                        candidate,
                     },
                 )
-                .await;
+                .await
+            {
+                error!("Error occured while sending IceCandidate: {}", error);
+            }
         }
     };
-    println!("Hello!");
 }
 
 pub async fn service_create_chat_request(
