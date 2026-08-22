@@ -3,6 +3,7 @@ use futures_util::{SinkExt, StreamExt};
 use shared::models::websocket_models::{ClientEvent, ServerEvent};
 use sqlx::PgPool;
 use std::sync::Arc;
+use tracing::error;
 use uuid::Uuid;
 
 use crate::{
@@ -114,6 +115,22 @@ pub async fn handle_client_event(
                 // Sends ServerEvent::ChatRequestAccepted event to the user who originally sent ClientEvent::ChatRequest
                 .send_to_user(&from, ServerEvent::ChatRequestAccepted { from: user_id })
                 .await;
+        }
+        ClientEvent::WebRtcOffer { to, sdp } => {
+            if let Err(error) = connection_manager
+                .send_to_user(&to, ServerEvent::WebRtcOffer { from: user_id, sdp })
+                .await
+            {
+                error!("Error occured while sending WebRtcOffer: {}", error);
+            }
+        }
+        ClientEvent::WebRtcAnswer { to, sdp } => {
+            if let Err(error) = connection_manager
+                .send_to_user(&to, ServerEvent::WebRtcAnswer { from: user_id, sdp })
+                .await
+            {
+                error!("Error occured while sending WebRtcAnswer: {}", error);
+            }
         }
         _ => {
             let _ = connection_manager

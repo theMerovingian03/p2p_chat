@@ -13,13 +13,16 @@ use commands::auth::*;
 use commands::webrtc::*;
 use commands::websocket::*;
 use std::sync::Arc;
-use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
+use tracing_subscriber::EnvFilter;
+// use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 use websocket::manager::WebSocketManager;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    tracing_subscriber::registry()
-        .with(tracing_subscriber::fmt::layer())
+    tracing_subscriber::fmt()
+        .with_env_filter(EnvFilter::new(
+            "desktop_lib=debug, server=debug,tokio_tungstenite=off",
+        ))
         .init();
 
     // Create WebSocket manager
