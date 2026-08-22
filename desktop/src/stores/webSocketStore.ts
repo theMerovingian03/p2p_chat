@@ -71,18 +71,6 @@ export const useWebsocketStore = create<WebsocketState>((set) => ({
                 console.log("Your chat request was accepted by: ", event.from);
                 break;
 
-            case "WebRtcOffer":
-                console.log("WebRtcOffer event: to be implemented");
-                break;
-
-            case "WebRtcAnswer":
-                console.log("WebRtcAnswer event: to be implemented");
-                break;
-
-            case "IceCandidate":
-                console.log("IceCandidate event: to be implemented");
-                break;
-
             case "GenericMessage":
                 console.log("Message received from server: ", event.message);
                 break;

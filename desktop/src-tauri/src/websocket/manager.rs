@@ -1,5 +1,6 @@
+use crate::{utilities::websocket_status::*, webrtc::manager::WebRtcManager};
 use futures_util::sink::SinkExt;
-use futures_util::StreamExt;
+use futures_util::stream::StreamExt;
 use parking_lot::Mutex;
 use serde_json::{json, Value};
 use shared::models::websocket_models::{ClientEvent, ServerEvent};
@@ -9,25 +10,7 @@ use tokio::sync::mpsc;
 use tokio_tungstenite::{connect_async, tungstenite::Message};
 use tracing::{debug, error, info};
 
-/// WebSocket connection status
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum WebSocketStatus {
-    Disconnected,
-    Connecting,
-    Connected,
-}
-
-impl WebSocketStatus {
-    pub fn as_str(&self) -> &'static str {
-        match self {
-            WebSocketStatus::Disconnected => "disconnected",
-            WebSocketStatus::Connecting => "connecting",
-            WebSocketStatus::Connected => "connected",
-        }
-    }
-}
-
-/// WebSocket manager responsible for connection lifecycle and event handling
+// WebSocket manager responsible for connection lifecycle and event handling
 // Unbounded causes backpressure
 pub struct WebSocketManager {
     status: Arc<Mutex<WebSocketStatus>>,
@@ -57,6 +40,7 @@ impl WebSocketManager {
 
     /// Emit a Tauri event to the frontend
     fn emit_event(&self, event_name: &str, payload: Value) {
+        // Avoid taking ownership
         if let Some(app) = self.app_handle.lock().as_ref() {
             if let Err(e) = app.emit(event_name, &payload) {
                 error!("Failed to emit event {}: {}", event_name, e);
@@ -70,7 +54,12 @@ impl WebSocketManager {
     }
 
     /// Connect to WebSocket server
-    pub async fn connect(&self, ws_url: String, ws_token: String) {
+    pub async fn connect(
+        &self,
+        ws_url: String,
+        ws_token: String,
+        webrtc_manager: Arc<WebRtcManager>,
+    ) {
         // Drops the mutex guard before continuing
         let old_status = {
             let mut status = self.status.lock();
@@ -107,7 +96,11 @@ impl WebSocketManager {
                 let app_handle = Arc::clone(&self.app_handle);
 
                 // Task to read messages from server
-                let read_handle = tokio::spawn(read_websocket_messages(read, app_handle.clone()));
+                let read_handle = tokio::spawn(read_websocket_messages(
+                    read,
+                    app_handle.clone(),
+                    webrtc_manager,
+                ));
 
                 // Task to write messages to server
                 tokio::spawn(write_websocket_messages(write, rx));
@@ -184,9 +177,8 @@ async fn read_websocket_messages(
         >,
     >,
     app_handle: Arc<Mutex<Option<tauri::AppHandle>>>,
+    webrtc_manager: Arc<WebRtcManager>,
 ) {
-    use futures_util::stream::StreamExt;
-
     while let Some(result) = read.next().await {
         match result {
             Ok(Message::Text(text)) => {
@@ -194,12 +186,41 @@ async fn read_websocket_messages(
 
                 match serde_json::from_str::<ServerEvent>(&text) {
                     Ok(event) => {
-                        // Emit the server event to React
-                        if let Some(app) = app_handle.lock().as_ref() {
-                            let payload = serde_json::to_value(&event)
-                                .unwrap_or_else(|_| json!({"error": "serialization failed"}));
-                            if let Err(e) = app.emit("ws-event", &payload) {
-                                error!("Failed to emit ws-event: {}", e);
+                        match event {
+                            // Handle WebRTC related events here itself
+                            ServerEvent::WebRtcOffer { from, sdp } => {
+                                if let Err(e) = webrtc_manager.handle_offer(from, sdp).await {
+                                    error!("Failed to handle WebRTC Offer: {}", e);
+                                }
+                            }
+                            ServerEvent::WebRtcAnswer { from, sdp } => {
+                                if let Err(e) = webrtc_manager.handle_answer(from, sdp).await {
+                                    error!("Failed to handle WebRTC answer: {}", e);
+                                }
+                            }
+                            ServerEvent::IceCandidate { from, candidate } => {
+                                if let Err(e) =
+                                    webrtc_manager.handle_ice_candidate(from, candidate).await
+                                {
+                                    error!("Failed to handle ICE candidate: {}", e);
+                                }
+                            }
+                            ServerEvent::ChatRequestAccepted { from } => {
+                                if let Err(e) = webrtc_manager.create_offer(from).await {
+                                    error!("Failed to send WebRTC Offer: {}", e);
+                                }
+                            }
+                            // Everything else goes to React
+                            event => {
+                                if let Some(app) = app_handle.lock().as_ref() {
+                                    let payload = serde_json::to_value(&event).unwrap_or_else(
+                                        |_| json!({"error": "serialization failed"}),
+                                    );
+
+                                    if let Err(e) = app.emit("ws-event", &payload) {
+                                        error!("Failed to emit ws-event: {}", e);
+                                    }
+                                }
                             }
                         }
                     }

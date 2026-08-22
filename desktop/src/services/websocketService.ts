@@ -69,30 +69,3 @@ export async function acceptChatRequest(from: string) {
         throw error;
     }
 }
-
-export async function sendWebRtcOffer(to: string, sdp: string) {
-    try {
-        await invoke("send_webrtc_offer", { to, sdp });
-    } catch (error) {
-        console.error("Failed to send WebRTC offer:", error);
-        throw error;
-    }
-}
-
-export async function sendWebRtcAnswer(to: string, sdp: string) {
-    try {
-        await invoke("send_webrtc_answer", { to, sdp });
-    } catch (error) {
-        console.error("Failed to send WebRTC answer:", error);
-        throw error;
-    }
-}
-
-export async function sendIceCandidate(to: string, candidate: string) {
-    try {
-        await invoke("send_ice_candidate", { to, candidate });
-    } catch (error) {
-        console.error("Failed to send ICE candidate:", error);
-        throw error;
-    }
-}

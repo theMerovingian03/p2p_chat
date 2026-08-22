@@ -1,33 +1,32 @@
-use crate::websocket::WebSocketManager;
+// PeerConnection, create_peer_connection, etc.
+use crate::utilities::peer_handler::*;
+use crate::utilities::signalizer::Signaling;
+use crate::websocket::manager::WebSocketManager;
 use shared::models::websocket_models::ClientEvent;
 use std::{collections::HashMap, sync::Arc};
 use tokio::sync::Mutex;
 use uuid::Uuid;
-use webrtc::peer_connection::{
-    PeerConnection, PeerConnectionBuilder, PeerConnectionEventHandler, RTCConfigurationBuilder,
-    RTCIceServer, RTCPeerConnectionIceEvent, RTCSessionDescription,
-};
-
-#[derive(Clone)]
-pub struct PeerHandler {
-    peer_id: Uuid,
-    websocket: Arc<WebSocketManager>,
+use webrtc::peer_connection::{PeerConnection, RTCSessionDescription};
+pub struct WebRtcManager {
+    peers: Mutex<HashMap<Uuid, Arc<dyn PeerConnection>>>,
+    signaling: Arc<dyn Signaling>,
 }
 
-// Temporary event handler
 #[async_trait::async_trait]
-impl PeerConnectionEventHandler for PeerHandler {
-    async fn on_ice_candidate(&self, event: RTCPeerConnectionIceEvent) {
-        println!("New local ice candidate gathered! {}", event.candidate);
+impl Signaling for WebSocketManager {
+    async fn send(&self, event: ClientEvent) -> Result<(), String> {
+        self.send_event(event).await
     }
 }
 
-pub struct WebRtcManager {
-    peers: Mutex<HashMap<Uuid, Arc<dyn PeerConnection>>>,
-    websocket: Arc<WebSocketManager>,
-}
-
 impl WebRtcManager {
+    pub fn new(signaling: Arc<dyn Signaling>) -> Self {
+        Self {
+            peers: Mutex::new(HashMap::new()),
+            signaling,
+        }
+    }
+    // Helper to check if peer connection already exists
     async fn get_or_create_peer_connection(
         &self,
         peer_id: Uuid,
@@ -42,8 +41,9 @@ impl WebRtcManager {
         // Create the connection without holding the lock
         let peer_handler = PeerHandler {
             peer_id,
-            websocket: Arc::clone(&self.websocket),
+            signaling: Arc::clone(&self.signaling),
         };
+        // TODO: Optimization If existing connection is used, this is an unnecessary create
         let peer_connection = create_peer_connection(peer_handler).await?;
         let mut peers = self.peers.lock().await;
         // Another task could have created one while we were awaiting.
@@ -65,8 +65,9 @@ impl WebRtcManager {
             .await
             .map_err(|e| e.to_string())?;
         // Finally send offer to server, which will route to appropriate ID
-        self.websocket
-            .send_event(ClientEvent::WebRtcOffer {
+        self.signaling
+            // calls WebsocketManager's send_event
+            .send(ClientEvent::WebRtcOffer {
                 to: peer_id,
                 sdp: offer.sdp,
             })
@@ -86,8 +87,8 @@ impl WebRtcManager {
         pc.set_local_description(answer.clone())
             .await
             .map_err(|e| e.to_string())?;
-        self.websocket
-            .send_event(ClientEvent::WebRtcAnswer {
+        self.signaling
+            .send(ClientEvent::WebRtcAnswer {
                 to: peer_id,
                 sdp: answer.sdp,
             })
@@ -96,35 +97,29 @@ impl WebRtcManager {
     }
 
     pub async fn handle_answer(&self, peer_id: Uuid, sdp: String) -> Result<(), String> {
-        let peers = self.peers.lock().await;
-        let pc = peers
-            .get(&peer_id)
-            .ok_or_else(|| "No peer found!".to_string())?;
+        let pc = {
+            let peers = self.peers.lock().await;
+            peers
+                .get(&peer_id)
+                .cloned()
+                .ok_or_else(|| "No peer found!".to_string())?
+        };
         let answer = RTCSessionDescription::answer(sdp).map_err(|e| e.to_string())?;
         pc.set_remote_description(answer)
             .await
             .map_err(|e| e.to_string())?;
         Ok(())
     }
-}
 
-pub async fn create_peer_connection(
-    handler: PeerHandler,
-) -> Result<Arc<dyn PeerConnection>, String> {
-    let config = RTCConfigurationBuilder::default()
-        .with_ice_servers(vec![RTCIceServer {
-            urls: vec!["stun:stun.l.google.com:19302".to_owned()],
-            ..Default::default()
-        }])
-        .build();
+    pub async fn cleanup_peer_connection(&self, peer_id: Uuid) -> Result<(), String> {
+        if let Some(pc) = self.peers.lock().await.remove(&peer_id) {
+            pc.close().await.map_err(|e| e.to_string())?;
+        }
+        Ok(())
+    }
 
-    let pc = PeerConnectionBuilder::new()
-        .with_configuration(config)
-        .with_handler(Arc::new(handler))
-        .with_udp_addrs(vec!["0.0.0.0:0"])
-        .build()
-        .await
-        .map_err(|e| e.to_string())?;
-
-    Ok(Arc::new(pc))
+    pub async fn handle_ice_candidate(&self, from: Uuid, candidate: String) -> Result<(), String> {
+        println!("Handling ICE Candicate: {} from {}", candidate, from);
+        Ok(())
+    }
 }
