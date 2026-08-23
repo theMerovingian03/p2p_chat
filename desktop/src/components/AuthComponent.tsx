@@ -82,7 +82,7 @@ export default function AuthComponent() {
             <div className="flex min-h-screen items-center justify-center text-white">
                 <div className="flex flex-row gap-2">
                     <Spinner />
-                    <span className="mt-2">Establishing secure peer link...</span>
+                    <span>Establishing secure peer link...</span>
                 </div>
             </div>
         );
