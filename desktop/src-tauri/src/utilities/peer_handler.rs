@@ -1,5 +1,5 @@
 use crate::utilities::signalizer::Signaling;
-use shared::models::websocket_models::ClientEvent;
+use shared::models::websocket_models::{ClientEvent, IceCandidate};
 use std::sync::Arc;
 use uuid::Uuid;
 use webrtc::peer_connection::{
@@ -12,24 +12,37 @@ pub struct PeerHandler {
     pub peer_id: Uuid,
     pub signaling: Arc<dyn Signaling>,
 }
-// Temporary event handler
+
 #[async_trait::async_trait]
 impl PeerConnectionEventHandler for PeerHandler {
     async fn on_ice_candidate(&self, event: RTCPeerConnectionIceEvent) {
-        if let Err(e) = self
-            .signaling
-            // calls WebsocketManager's send_event
-            .send(ClientEvent::IceCandidate {
-                to: self.peer_id,
-                candidate: event.candidate.to_string(),
-            })
-            .await
-        {
-            tracing::error!(
-                peer_id = %self.peer_id,
-                error = %e,
-                "Failed to send ICE candidate"
-            );
+        match event.candidate.to_json() {
+            Ok(candidate) => {
+                let event = ClientEvent::IceCandidate {
+                    to: self.peer_id,
+                    candidate: IceCandidate {
+                        candidate: candidate.candidate,
+                        sdp_mid: candidate.sdp_mid,
+                        sdp_mline_index: candidate.sdp_mline_index,
+                        username_fragment: candidate.username_fragment,
+                    },
+                };
+
+                if let Err(e) = self.signaling.send(event).await {
+                    tracing::error!(
+                        peer_id = %self.peer_id,
+                        error = %e,
+                        "Failed to send ICE candidate"
+                    );
+                }
+            }
+            Err(e) => {
+                tracing::error!(
+                    peer_id = %self.peer_id,
+                    error = %e,
+                    "Failed to serialize ICE candidate"
+                );
+            }
         }
     }
 }

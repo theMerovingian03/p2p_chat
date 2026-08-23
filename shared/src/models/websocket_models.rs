@@ -15,6 +15,14 @@ pub enum WsErrorCode {
     InvalidRequest,
 }
 
+#[derive(Debug, Deserialize, Clone, Type, Serialize)]
+pub struct IceCandidate {
+    pub candidate: String,
+    pub sdp_mid: Option<String>,
+    pub sdp_mline_index: Option<u16>,
+    pub username_fragment: Option<String>,
+}
+
 #[derive(Debug, Serialize, Deserialize, Type, Clone)]
 #[serde(tag = "type")]
 pub enum ServerEvent {
@@ -24,7 +32,7 @@ pub enum ServerEvent {
     PresenceOffline { id: Uuid },
     WebRtcOffer { from: Uuid, sdp: String },
     WebRtcAnswer { from: Uuid, sdp: String },
-    IceCandidate { from: Uuid, candidate: String },
+    IceCandidate { from: Uuid, candidate: IceCandidate },
     Error { code: WsErrorCode, message: String },
 
     GenericMessage { message: String },
@@ -38,5 +46,5 @@ pub enum ClientEvent {
     ChatRequestAccept { from: Uuid },
     WebRtcOffer { to: Uuid, sdp: String },
     WebRtcAnswer { to: Uuid, sdp: String },
-    IceCandidate { to: Uuid, candidate: String },
+    IceCandidate { to: Uuid, candidate: IceCandidate },
 }

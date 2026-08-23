@@ -2,12 +2,12 @@
 use crate::utilities::peer_handler::*;
 use crate::utilities::signalizer::Signaling;
 use crate::websocket::manager::WebSocketManager;
-use shared::models::websocket_models::ClientEvent;
+use shared::models::websocket_models::{ClientEvent, IceCandidate};
 use std::{collections::HashMap, sync::Arc};
 use tokio::sync::Mutex;
 use tracing::debug;
 use uuid::Uuid;
-use webrtc::peer_connection::{PeerConnection, RTCSessionDescription};
+use webrtc::peer_connection::{PeerConnection, RTCIceCandidateInit, RTCSessionDescription};
 pub struct WebRtcManager {
     peers: Mutex<HashMap<Uuid, Arc<dyn PeerConnection>>>,
     signaling: Arc<dyn Signaling>,
@@ -100,15 +100,16 @@ impl WebRtcManager {
         pc.set_local_description(answer.clone())
             .await
             .map_err(|e| e.to_string())?;
-        // let local_description = pc
-        //     .local_description()
-        //     .await
-        //     .ok_or_else(|| "Local description not available".to_string())?;
+        let local_description = pc
+            .local_description()
+            .await
+            .ok_or_else(|| "Local description not available".to_string())?;
+        // pc.add_ice_candidate(candidate)
         self.signaling
             .send(ClientEvent::WebRtcAnswer {
                 to: peer_id,
-                // sdp: local_description.sdp,
-                sdp: answer.sdp,
+                sdp: local_description.sdp,
+                // sdp: answer.sdp,
             })
             .await?;
         Ok(())
@@ -136,8 +137,28 @@ impl WebRtcManager {
         Ok(())
     }
 
-    pub async fn handle_ice_candidate(&self, from: Uuid, candidate: String) -> Result<(), String> {
-        println!("Handling ICE Candicate: {} from {}", candidate, from);
+    pub async fn handle_ice_candidate(
+        &self,
+        from: Uuid,
+        ice_candidate: IceCandidate,
+    ) -> Result<(), String> {
+        let pc = {
+            let peers = &self.peers.lock().await;
+            peers
+                .get(&from)
+                .cloned()
+                .ok_or_else(|| "No peer found!".to_string())?
+        };
+        let candidate = RTCIceCandidateInit {
+            candidate: ice_candidate.candidate,
+            sdp_mid: ice_candidate.sdp_mid,
+            sdp_mline_index: ice_candidate.sdp_mline_index,
+            username_fragment: ice_candidate.username_fragment,
+            url: None,
+        };
+        pc.add_ice_candidate(candidate)
+            .await
+            .map_err(|e| e.to_string())?;
         Ok(())
     }
 }

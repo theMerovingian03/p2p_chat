@@ -9,7 +9,7 @@ export type AuthResponse = {
 	user: UserDto,
 };
 
-export type ClientEvent = { type: "ChatRequestSend"; to: string } | { type: "ChatRequestAccept"; from: string } | { type: "WebRtcOffer"; to: string; sdp: string } | { type: "WebRtcAnswer"; to: string; sdp: string } | { type: "IceCandidate"; to: string; candidate: string };
+export type ClientEvent = { type: "ChatRequestSend"; to: string } | { type: "ChatRequestAccept"; from: string } | { type: "WebRtcOffer"; to: string; sdp: string } | { type: "WebRtcAnswer"; to: string; sdp: string } | { type: "IceCandidate"; to: string; candidate: IceCandidate };
 
 export type CreateFriendReqRequest = {
 	receiver_id: string,
@@ -29,6 +29,13 @@ export type FriendRowDto = {
 	friend_id: string,
 	username: string,
 	display_name: string,
+};
+
+export type IceCandidate = {
+	candidate: string,
+	sdp_mid: string | null,
+	sdp_mline_index: number | null,
+	username_fragment: string | null,
 };
 
 export type LoginRequest = {
@@ -52,7 +59,7 @@ export type RegisterRequest = {
 	display_name: string,
 };
 
-export type ServerEvent = { type: "ChatRequestIncoming"; from: string } | { type: "ChatRequestAccepted"; from: string } | { type: "PresenceOnline"; id: string } | { type: "PresenceOffline"; id: string } | { type: "WebRtcOffer"; from: string; sdp: string } | { type: "WebRtcAnswer"; from: string; sdp: string } | { type: "IceCandidate"; from: string; candidate: string } | { type: "Error"; code: WsErrorCode; message: string } | { type: "GenericMessage"; message: string };
+export type ServerEvent = { type: "ChatRequestIncoming"; from: string } | { type: "ChatRequestAccepted"; from: string } | { type: "PresenceOnline"; id: string } | { type: "PresenceOffline"; id: string } | { type: "WebRtcOffer"; from: string; sdp: string } | { type: "WebRtcAnswer"; from: string; sdp: string } | { type: "IceCandidate"; from: string; candidate: IceCandidate } | { type: "Error"; code: WsErrorCode; message: string } | { type: "GenericMessage"; message: string };
 
 export type UserDto = {
 	id: string,
