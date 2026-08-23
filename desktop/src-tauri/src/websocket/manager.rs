@@ -267,7 +267,7 @@ async fn write_websocket_messages(
         match serde_json::to_string(&event) {
             Ok(text) => {
                 debug!("Sending event: {}", text);
-                if let Err(e) = write.send(Message::Text(text)).await {
+                if let Err(e) = write.send(Message::Text(text.into())).await {
                     error!("Failed to send WebSocket message: {}", e);
                     break;
                 }
