@@ -10,6 +10,8 @@ use uuid::Uuid;
 use webrtc::peer_connection::{PeerConnection, RTCIceCandidateInit, RTCSessionDescription};
 pub struct WebRtcManager {
     peers: Mutex<HashMap<Uuid, Arc<dyn PeerConnection>>>,
+    // Buffered ICE candidates
+    pending_candidates: Mutex<HashMap<Uuid, Vec<IceCandidate>>>,
     signaling: Arc<dyn Signaling>,
 }
 
@@ -24,6 +26,7 @@ impl WebRtcManager {
     pub fn new(signaling: Arc<dyn Signaling>) -> Self {
         Self {
             peers: Mutex::new(HashMap::new()),
+            pending_candidates: Mutex::new(HashMap::new()),
             signaling,
         }
     }
@@ -40,42 +43,51 @@ impl WebRtcManager {
                 return Ok(Arc::clone(peer_connection)); // Clone of Arc pointer for PeerConnection
             }
         }
+
         // Create the connection without holding the lock
         let peer_handler = PeerHandler {
             peer_id,
             signaling: Arc::clone(&self.signaling),
         };
+
         // TODO: Optimization If existing connection is used, this is an unnecessary create
         let peer_connection = create_peer_connection(peer_handler).await?;
         let mut peers = self.peers.lock().await;
+
         // Another task could have created one while we were awaiting.
         // Prefer the existing one in that case.
         if let Some(existing) = peers.get(&peer_id) {
             return Ok(Arc::clone(existing));
         }
         peers.insert(peer_id, Arc::clone(&peer_connection));
+
         Ok(peer_connection)
     }
 
     pub async fn create_offer(&self, peer_id: Uuid) -> Result<(), String> {
         // Peer connection
         let pc = self.get_or_create_peer_connection(peer_id).await?;
-        // // Data channel for media
-        // let data_channel = pc
-        //     .create_data_channel("chat", None)
-        //     .await
-        //     .map_err(|e| e.to_string())?;
+
+        // Data channel for media
+        let _ = pc
+            .create_data_channel("chat", None)
+            .await
+            .map_err(|e| e.to_string())?;
+
         // Create offer
         let offer = pc.create_offer(None).await.map_err(|e| e.to_string())?;
+
         // Set sdp
         pc.set_local_description(offer.clone())
             .await
             .map_err(|e| e.to_string())?;
+
         // Extract local descrption for sdp to ensure ICE Candidate is present
         let local_description = pc
             .local_description()
             .await
             .ok_or_else(|| "Local description not available".to_string())?;
+
         // Finally send offer to server, which will route to appropriate ID
         self.signaling
             // calls WebsocketManager's send_event
@@ -84,34 +96,57 @@ impl WebRtcManager {
                 sdp: local_description.sdp,
             })
             .await?;
+
         Ok(())
     }
 
     pub async fn handle_offer(&self, peer_id: Uuid, sdp: String) -> Result<(), String> {
         debug!("Handling WebRTC Offer");
         let pc = self.get_or_create_peer_connection(peer_id).await?;
+
         // Convert sdp string to RTCSessionDescription
         let offer = RTCSessionDescription::offer(sdp).map_err(|e| e.to_string())?;
-        // Set this as the remote descriptor of the connection.
-        pc.set_remote_description(offer)
-            .await
-            .map_err(|e| e.to_string())?;
+
+        // Process ICE candidates that arrived before the offer
+        let pending_candidates = {
+            let mut pending = self.pending_candidates.lock().await;
+            // Set this as the remote descriptor of the connection.
+            pc.set_remote_description(offer)
+                .await
+                .map_err(|e| e.to_string())?;
+            pending.remove(&peer_id).unwrap_or_default()
+        };
+
+        for ice_candidate in pending_candidates {
+            let candidate = RTCIceCandidateInit {
+                candidate: ice_candidate.candidate,
+                sdp_mid: ice_candidate.sdp_mid,
+                sdp_mline_index: ice_candidate.sdp_mline_index,
+                username_fragment: ice_candidate.username_fragment,
+                url: None,
+            };
+
+            pc.add_ice_candidate(candidate)
+                .await
+                .map_err(|e| e.to_string())?;
+        }
         let answer = pc.create_answer(None).await.map_err(|e| e.to_string())?;
-        pc.set_local_description(answer.clone())
+        pc.set_local_description(answer)
             .await
             .map_err(|e| e.to_string())?;
+
         let local_description = pc
             .local_description()
             .await
             .ok_or_else(|| "Local description not available".to_string())?;
-        // pc.add_ice_candidate(candidate)
+
         self.signaling
             .send(ClientEvent::WebRtcAnswer {
                 to: peer_id,
                 sdp: local_description.sdp,
-                // sdp: answer.sdp,
             })
             .await?;
+
         Ok(())
     }
 
@@ -123,17 +158,21 @@ impl WebRtcManager {
                 .cloned()
                 .ok_or_else(|| "No peer found!".to_string())?
         };
+
         let answer = RTCSessionDescription::answer(sdp).map_err(|e| e.to_string())?;
         pc.set_remote_description(answer)
             .await
             .map_err(|e| e.to_string())?;
+
         Ok(())
     }
 
     pub async fn cleanup_peer_connection(&self, peer_id: Uuid) -> Result<(), String> {
-        if let Some(pc) = self.peers.lock().await.remove(&peer_id) {
+        let pc = self.peers.lock().await.remove(&peer_id);
+        if let Some(pc) = pc {
             pc.close().await.map_err(|e| e.to_string())?;
         }
+        self.pending_candidates.lock().await.remove(&peer_id);
         Ok(())
     }
 
@@ -149,6 +188,16 @@ impl WebRtcManager {
                 .cloned()
                 .ok_or_else(|| "No peer found!".to_string())?
         };
+
+        // Check whether we have received/set a remote description yet before adding an ICE candidate
+        // Avoids race condition
+        let mut pending = self.pending_candidates.lock().await;
+        if pc.remote_description().await.is_none() {
+            pending.entry(from).or_default().push(ice_candidate);
+            return Ok(());
+        }
+        drop(pending);
+
         let candidate = RTCIceCandidateInit {
             candidate: ice_candidate.candidate,
             sdp_mid: ice_candidate.sdp_mid,
@@ -156,6 +205,7 @@ impl WebRtcManager {
             username_fragment: ice_candidate.username_fragment,
             url: None,
         };
+
         pc.add_ice_candidate(candidate)
             .await
             .map_err(|e| e.to_string())?;
