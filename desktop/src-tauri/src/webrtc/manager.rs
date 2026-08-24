@@ -1,10 +1,10 @@
 // PeerConnection, create_peer_connection, etc.
-use crate::utilities::peer_handler::*;
 use crate::utilities::signalizer::Signaling;
+use crate::utilities::{dc_events::DcEvent, peer_handler::*};
 use crate::websocket::manager::WebSocketManager;
 use shared::models::websocket_models::{ClientEvent, IceCandidate};
 use std::{collections::HashMap, sync::Arc};
-use tokio::sync::Mutex;
+use tokio::sync::{mpsc, Mutex};
 use tracing::debug;
 use uuid::Uuid;
 use webrtc::peer_connection::{PeerConnection, RTCIceCandidateInit, RTCSessionDescription};
@@ -13,6 +13,7 @@ pub struct WebRtcManager {
     // Buffered ICE candidates
     pending_candidates: Mutex<HashMap<Uuid, Vec<IceCandidate>>>,
     signaling: Arc<dyn Signaling>,
+    event_tx: mpsc::Sender<DcEvent>,
 }
 
 #[async_trait::async_trait]
@@ -23,11 +24,12 @@ impl Signaling for WebSocketManager {
 }
 
 impl WebRtcManager {
-    pub fn new(signaling: Arc<dyn Signaling>) -> Self {
+    pub fn new(signaling: Arc<dyn Signaling>, event_tx: mpsc::Sender<DcEvent>) -> Self {
         Self {
             peers: Mutex::new(HashMap::new()),
             pending_candidates: Mutex::new(HashMap::new()),
             signaling,
+            event_tx,
         }
     }
     // Helper to check if peer connection already exists
@@ -48,6 +50,7 @@ impl WebRtcManager {
         let peer_handler = PeerHandler {
             peer_id,
             signaling: Arc::clone(&self.signaling),
+            event_tx: self.event_tx.clone(),
         };
 
         // TODO: Optimization If existing connection is used, this is an unnecessary create

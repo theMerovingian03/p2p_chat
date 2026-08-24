@@ -1,17 +1,22 @@
-use crate::utilities::signalizer::Signaling;
+use crate::utilities::{dc_events::DcEvent, signalizer::Signaling};
 use shared::models::websocket_models::{ClientEvent, IceCandidate};
 use std::sync::Arc;
+use tokio::sync::mpsc;
 use tracing::{error, info};
 use uuid::Uuid;
-use webrtc::peer_connection::{
-    PeerConnection, PeerConnectionBuilder, PeerConnectionEventHandler, RTCConfigurationBuilder,
-    RTCIceServer, RTCPeerConnectionIceEvent, RTCPeerConnectionState,
+use webrtc::{
+    data_channel::DataChannel,
+    peer_connection::{
+        PeerConnection, PeerConnectionBuilder, PeerConnectionEventHandler, RTCConfigurationBuilder,
+        RTCIceServer, RTCPeerConnectionIceEvent, RTCPeerConnectionState,
+    },
 };
 
 #[derive(Clone)]
 pub struct PeerHandler {
     pub peer_id: Uuid,
     pub signaling: Arc<dyn Signaling>,
+    pub event_tx: mpsc::Sender<DcEvent>,
 }
 
 #[async_trait::async_trait]
@@ -57,6 +62,26 @@ impl PeerConnectionEventHandler for PeerHandler {
             RTCPeerConnectionState::Closed => info!("Closed peer connection"),
             _ => {}
         }
+    }
+    async fn on_data_channel(&self, channel: Arc<dyn DataChannel>) {
+        info!("Data channel received");
+
+        if channel.label().await != Ok("chat".to_string()) {
+            error!("Invalid Data channel label");
+            return;
+        }
+
+        let event_tx = self.event_tx.clone();
+        let peer_id = self.peer_id;
+
+        tokio::spawn(async move {
+            while let Some(event) = channel.poll().await {
+                if event_tx.send(DcEvent { peer_id, event }).await.is_err() {
+                    error!("Failed to send DataChannelEvent!");
+                    break;
+                }
+            }
+        });
     }
 }
 

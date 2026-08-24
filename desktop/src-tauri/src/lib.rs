@@ -7,12 +7,16 @@ mod webrtc;
 mod websocket;
 
 use crate::app_state::AppState;
-use crate::utilities::signalizer::Signaling;
+use crate::utilities::{
+    dc_events::{process_events, DcEvent},
+    signalizer::Signaling,
+};
 use crate::webrtc::manager::WebRtcManager;
 use commands::auth::*;
 use commands::webrtc::*;
 use commands::websocket::*;
 use std::sync::Arc;
+use tokio::sync::mpsc;
 use tracing_subscriber::EnvFilter;
 // use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 use websocket::manager::WebSocketManager;
@@ -25,6 +29,8 @@ pub fn run() {
         ))
         .init();
 
+    let (event_tx, event_rx) = mpsc::channel::<DcEvent>(100);
+
     // Create WebSocket manager
     let ws_manager = Arc::new(WebSocketManager::new());
     // Create WebRTC Manager
@@ -32,7 +38,10 @@ pub fn run() {
         // Anything that implements Singaling Trait
         // Create Arc pointer for WS manager
         Arc::clone(&ws_manager) as Arc<dyn Signaling>,
+        event_tx,
     ));
+
+    tokio::spawn(process_events(event_rx));
 
     let app_state = AppState {
         websocket_manager: Arc::clone(&ws_manager),
