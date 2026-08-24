@@ -59,7 +59,7 @@ export type RegisterRequest = {
 	display_name: string,
 };
 
-export type ServerEvent = { type: "ChatRequestIncoming"; from: string } | { type: "ChatRequestAccepted"; from: string } | { type: "PresenceOnline"; id: string } | { type: "PresenceOffline"; id: string } | { type: "WebRtcOffer"; from: string; sdp: string } | { type: "WebRtcAnswer"; from: string; sdp: string } | { type: "IceCandidate"; from: string; candidate: IceCandidate } | { type: "Error"; code: WsErrorCode; message: string } | { type: "GenericMessage"; message: string };
+export type ServerEvent = { type: "ChatRequestIncoming"; from: string; username: string } | { type: "ChatRequestAccepted"; from: string } | { type: "PresenceOnline"; id: string } | { type: "PresenceOffline"; id: string } | { type: "WebRtcOffer"; from: string; sdp: string } | { type: "WebRtcAnswer"; from: string; sdp: string } | { type: "IceCandidate"; from: string; candidate: IceCandidate } | { type: "Error"; code: WsErrorCode; message: string } | { type: "GenericMessage"; message: string };
 
 export type UserDto = {
 	id: string,

@@ -26,7 +26,7 @@ pub struct IceCandidate {
 #[derive(Debug, Serialize, Deserialize, Type, Clone)]
 #[serde(tag = "type")]
 pub enum ServerEvent {
-    ChatRequestIncoming { from: Uuid },
+    ChatRequestIncoming { from: Uuid, username: String },
     ChatRequestAccepted { from: Uuid },
     PresenceOnline { id: Uuid },
     PresenceOffline { id: Uuid },

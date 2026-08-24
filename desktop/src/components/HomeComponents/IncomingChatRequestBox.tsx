@@ -6,10 +6,11 @@ type IncomingChatRequestBoxProps = {
     id: string;
     username: string;
     createdAt: string;
+    from: string;
     onAction?: () => void;
 };
 
-export default function IncomingChatRequestBox({ id, username, createdAt, onAction }: IncomingChatRequestBoxProps) {
+export default function IncomingChatRequestBox({ id, from, username, createdAt, onAction }: IncomingChatRequestBoxProps) {
     const [dialog, setDialog] = useState<{ visible: boolean; x: number; y: number }>({ visible: false, x: 0, y: 0 });
     const [loadingAccept, setLoadingAccept] = useState(false);
     const [loadingDecline, setLoadingDecline] = useState(false);
@@ -30,7 +31,7 @@ export default function IncomingChatRequestBox({ id, username, createdAt, onActi
     async function handleAccept() {
         setLoadingAccept(true);
         try {
-            await acceptChatRequest(username);
+            await acceptChatRequest(from);
             removeIncomingChatRequest(id);
             onAction?.();
         } catch (err) {
@@ -56,7 +57,7 @@ export default function IncomingChatRequestBox({ id, username, createdAt, onActi
 
     return (
         <div ref={containerRef} className="relative">
-            <div className="flex cursor-pointer items-center justify-between border-b border-white/20 p-3 text-white transition-colors duration-200 hover:bg-white/10">
+            <div className="flex cursor-pointer items-center gap-5 border-b border-white/20 p-3 text-white transition-colors duration-200 hover:bg-white/10">
                 <button
                     onClick={(e) => setDialog({ visible: true, x: e.clientX, y: e.clientY })}
                     className="cursor-pointer rounded px-2 py-1 text-sm transition-colors duration-200 hover:bg-white hover:text-blue-900"

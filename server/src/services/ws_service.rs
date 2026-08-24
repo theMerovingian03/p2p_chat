@@ -8,7 +8,7 @@ use uuid::Uuid;
 
 use crate::{
     errors::AppError,
-    repositories::friend_repository::are_friends,
+    repositories::friend_repository::get_friend_username,
     utilities::{app_to_ws_err::app_error_to_ws_error, connection_manager::ConnectionManager},
 };
 
@@ -166,16 +166,17 @@ pub async fn service_create_chat_request(
         ));
     }
 
-    // Make sure they are friends.
-    let are_friends = are_friends(db, user_id, receiver_id).await;
-    if !are_friends {
-        return Err(AppError::Forbidden);
-    }
+    let username = get_friend_username(db, user_id, receiver_id)
+        .await?
+        .ok_or(AppError::Forbidden)?;
 
     connection_manager
         .send_to_user(
             &receiver_id,
-            ServerEvent::ChatRequestIncoming { from: user_id },
+            ServerEvent::ChatRequestIncoming {
+                from: user_id,
+                username,
+            },
         )
         .await
         .map_err(|_| AppError::Internal)?;

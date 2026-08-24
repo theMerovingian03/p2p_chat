@@ -3,7 +3,6 @@ import IncomingChatRequestBox from "./IncomingChatRequestBox";
 
 export default function IncomingChatRequests() {
     const incomingChatRequests = useWebsocketStore((state) => state.incomingChatRequests);
-    // TODO: Handle send WebRtcOffer
     const removeIncomingChatRequest = useWebsocketStore((state) => state.removeIncomingChatRequest);
 
     return (
@@ -21,7 +20,8 @@ export default function IncomingChatRequests() {
                         <IncomingChatRequestBox
                             key={request.id}
                             id={request.id}
-                            username={request.from}
+                            from={request.from}
+                            username={request.username}
                             createdAt={request.createdAt}
                             onAction={() => removeIncomingChatRequest(request.id)}
                         />

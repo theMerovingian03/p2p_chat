@@ -222,23 +222,29 @@ pub async fn get_friends(
     Ok(friends)
 }
 
-pub async fn are_friends(db: &PgPool, user_id: Uuid, receiver_user_id: Uuid) -> bool {
+pub async fn get_friend_username(
+    db: &PgPool,
+    user_id: Uuid,
+    receiver_user_id: Uuid,
+) -> Result<Option<String>, sqlx::Error> {
     sqlx::query_scalar(
         r#"
-        SELECT EXISTS(
-            SELECT 1
-            FROM friends
-            WHERE
-                (user_id = $1 AND friend_id = $2)
-                OR
-                (user_id = $2 AND friend_id = $1)
-        )
+        SELECT u.username
+        FROM users u
+        WHERE u.id = $1
+            AND EXISTS(
+                SELECT 1
+                FROM friends
+                WHERE
+                    (user_id = $1 AND friend_id = $2)
+                    OR
+                    (user_id = $2 AND friend_id = $1)
+            )
         "#,
     )
     .persistent(false)
     .bind(user_id)
     .bind(receiver_user_id)
-    .fetch_one(db)
+    .fetch_optional(db)
     .await
-    .unwrap_or(false)
 }

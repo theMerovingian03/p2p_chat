@@ -8,6 +8,7 @@ type IncomingChatRequest = {
     id: string;
     from: string;
     createdAt: string;
+    username: string;
 };
 
 // Create state which can be accessed through the store
@@ -18,7 +19,7 @@ interface WebsocketState {
 
     handleEvent: (event: ServerEvent) => void;
     setStatus: (status: WebsocketStatus) => void;
-    addIncomingChatRequest: (from: string) => void;
+    addIncomingChatRequest: (from: string, username: string) => void;
     removeIncomingChatRequest: (id: string) => void;
     initializeEventListeners: () => Promise<void>;
 }
@@ -60,6 +61,7 @@ export const useWebsocketStore = create<WebsocketState>((set) => ({
                                 id: `${event.from}-${Date.now()}`,
                                 from: event.from,
                                 createdAt: new Date().toISOString(),
+                                username: event.username
                             },
                         ],
                     };
@@ -87,7 +89,7 @@ export const useWebsocketStore = create<WebsocketState>((set) => ({
         set({ status });
     },
 
-    addIncomingChatRequest: (from) => {
+    addIncomingChatRequest: (from, username) => {
         set((state) => ({
             incomingChatRequests: [
                 ...state.incomingChatRequests,
@@ -95,6 +97,7 @@ export const useWebsocketStore = create<WebsocketState>((set) => ({
                     id: `${from}-${Date.now()}`,
                     from,
                     createdAt: new Date().toISOString(),
+                    username,
                 },
             ],
         }));

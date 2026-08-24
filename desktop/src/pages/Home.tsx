@@ -55,7 +55,7 @@ export default function HomePage() {
                         <div className="flex min-h-full w-1/4 flex-col p-2 gap-2">
                             {!error && user && <UserInfoBox user={user} />}
                             < WsConnectionBox />
-                            <CommonButton>Change Alias</CommonButton>
+                            {/* <CommonButton>Change Alias</CommonButton> */}
                             <CommonButton onClick={handleLogOut}>Log Out</CommonButton>
                             <IncomingChatRequests />
                             {error && <p className="text-white m-2">{error}</p>}
