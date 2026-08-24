@@ -1,10 +1,11 @@
 use crate::utilities::signalizer::Signaling;
 use shared::models::websocket_models::{ClientEvent, IceCandidate};
 use std::sync::Arc;
+use tracing::{error, info};
 use uuid::Uuid;
 use webrtc::peer_connection::{
     PeerConnection, PeerConnectionBuilder, PeerConnectionEventHandler, RTCConfigurationBuilder,
-    RTCIceServer, RTCPeerConnectionIceEvent,
+    RTCIceServer, RTCPeerConnectionIceEvent, RTCPeerConnectionState,
 };
 
 #[derive(Clone)]
@@ -43,6 +44,18 @@ impl PeerConnectionEventHandler for PeerHandler {
                     "Failed to serialize ICE candidate"
                 );
             }
+        }
+    }
+    // TODO: Cleanup, retry, etc.
+    async fn on_connection_state_change(&self, state: RTCPeerConnectionState) {
+        match state {
+            RTCPeerConnectionState::New => info!("New peer connection established!"),
+            RTCPeerConnectionState::Connected => info!("Peer connected!"),
+            RTCPeerConnectionState::Disconnected => info!("Peer disconnected."),
+            RTCPeerConnectionState::Failed => error!("Peer connection failed"),
+            RTCPeerConnectionState::Connecting => info!("Connecting to peer..."),
+            RTCPeerConnectionState::Closed => info!("Closed peer connection"),
+            _ => {}
         }
     }
 }
