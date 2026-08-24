@@ -81,7 +81,7 @@ impl WebRtcManager {
         let offer = pc.create_offer(None).await.map_err(|e| e.to_string())?;
 
         // Set sdp
-        pc.set_local_description(offer.clone())
+        pc.set_local_description(offer)
             .await
             .map_err(|e| e.to_string())?;
 

@@ -41,8 +41,6 @@ pub fn run() {
         event_tx,
     ));
 
-    tokio::spawn(process_events(event_rx));
-
     let app_state = AppState {
         websocket_manager: Arc::clone(&ws_manager),
         webrtc_manager: Arc::clone(&webrtc_manager),
@@ -54,6 +52,8 @@ pub fn run() {
         .setup(move |app| {
             // Set the app handle on the WebSocket manager so it can emit events
             ws_manager.set_app_handle(app.handle().clone());
+            // Spawn process to handle datachannel event
+            tauri::async_runtime::spawn(process_events(event_rx));
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
