@@ -1,17 +1,24 @@
 // PeerConnection, create_peer_connection, etc.
 use crate::utilities::signalizer::Signaling;
-use crate::utilities::{dc_events::DcEvent, peer_handler::*};
+use crate::utilities::{
+    dc_events::{spawn_data_channel_listener, DcEvent},
+    peer_handler::*,
+};
 use crate::websocket::manager::WebSocketManager;
+use bytes::BytesMut;
 use shared::models::websocket_models::{ClientEvent, IceCandidate};
 use std::{collections::HashMap, sync::Arc};
 use tokio::sync::{mpsc, Mutex};
 use tracing::debug;
 use uuid::Uuid;
+use webrtc::data_channel::DataChannel;
 use webrtc::peer_connection::{PeerConnection, RTCIceCandidateInit, RTCSessionDescription};
+
 pub struct WebRtcManager {
     peers: Mutex<HashMap<Uuid, Arc<dyn PeerConnection>>>,
     // Buffered ICE candidates
     pending_candidates: Mutex<HashMap<Uuid, Vec<IceCandidate>>>,
+    data_channels: Mutex<HashMap<Uuid, Arc<dyn DataChannel>>>,
     signaling: Arc<dyn Signaling>,
     event_tx: mpsc::Sender<DcEvent>,
 }
@@ -28,6 +35,7 @@ impl WebRtcManager {
         Self {
             peers: Mutex::new(HashMap::new()),
             pending_candidates: Mutex::new(HashMap::new()),
+            data_channels: Mutex::new(HashMap::new()),
             signaling,
             event_tx,
         }
@@ -72,10 +80,19 @@ impl WebRtcManager {
         let pc = self.get_or_create_peer_connection(peer_id).await?;
 
         // Data channel for media
-        let _ = pc
+        let data_channel = pc
             .create_data_channel("chat", None)
             .await
             .map_err(|e| e.to_string())?;
+
+        {
+            // Store data_channel
+            let mut lock = { self.data_channels.lock().await };
+            lock.insert(peer_id, Arc::clone(&data_channel));
+        } // drops mutex guard lock
+
+        debug!("Spawning data channel listener for offerer");
+        spawn_data_channel_listener(data_channel, self.event_tx.clone(), peer_id).await;
 
         // Create offer
         let offer = pc.create_offer(None).await.map_err(|e| e.to_string())?;
@@ -175,6 +192,10 @@ impl WebRtcManager {
         if let Some(pc) = pc {
             pc.close().await.map_err(|e| e.to_string())?;
         }
+        // Remove data channel
+        // No need to call channel.close() since it's already closed at this point.
+        self.data_channels.lock().await.remove(&peer_id);
+
         self.pending_candidates.lock().await.remove(&peer_id);
         Ok(())
     }
@@ -212,6 +233,23 @@ impl WebRtcManager {
         pc.add_ice_candidate(candidate)
             .await
             .map_err(|e| e.to_string())?;
+        Ok(())
+    }
+
+    pub async fn send_message(&self, peer_id: Uuid, message: Vec<u8>) -> Result<(), String> {
+        let channel = {
+            let channels = self.data_channels.lock().await;
+            channels
+                .get(&peer_id)
+                .cloned()
+                .ok_or_else(|| "No data channel for peer found!".to_string())?
+        };
+
+        channel
+            .send(BytesMut::from(message.as_slice()))
+            .await
+            .map_err(|e| e.to_string())?;
+
         Ok(())
     }
 }

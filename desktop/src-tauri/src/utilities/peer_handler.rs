@@ -1,8 +1,11 @@
-use crate::utilities::{dc_events::DcEvent, signalizer::Signaling};
+use crate::utilities::{
+    dc_events::{spawn_data_channel_listener, DcEvent},
+    signalizer::Signaling,
+};
 use shared::models::websocket_models::{ClientEvent, IceCandidate};
 use std::sync::Arc;
 use tokio::sync::mpsc;
-use tracing::{error, info};
+use tracing::{debug, error, info};
 use uuid::Uuid;
 use webrtc::{
     data_channel::DataChannel,
@@ -56,9 +59,9 @@ impl PeerConnectionEventHandler for PeerHandler {
         match state {
             RTCPeerConnectionState::New => info!("New peer connection established!"),
             RTCPeerConnectionState::Connected => info!("Peer connected!"),
+            RTCPeerConnectionState::Connecting => info!("Connecting to peer..."),
             RTCPeerConnectionState::Disconnected => info!("Peer disconnected."),
             RTCPeerConnectionState::Failed => error!("Peer connection failed"),
-            RTCPeerConnectionState::Connecting => info!("Connecting to peer..."),
             RTCPeerConnectionState::Closed => info!("Closed peer connection"),
             _ => {}
         }
@@ -74,14 +77,8 @@ impl PeerConnectionEventHandler for PeerHandler {
         let event_tx = self.event_tx.clone();
         let peer_id = self.peer_id;
 
-        tokio::spawn(async move {
-            while let Some(event) = channel.poll().await {
-                if event_tx.send(DcEvent { peer_id, event }).await.is_err() {
-                    error!("Failed to send DataChannelEvent!");
-                    break;
-                }
-            }
-        });
+        debug!("Spawning data channel listener for receiver");
+        spawn_data_channel_listener(channel, event_tx, peer_id).await;
     }
 }
 

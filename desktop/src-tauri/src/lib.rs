@@ -68,6 +68,7 @@ pub fn run() {
             send_chat_request,
             accept_chat_request,
             // WebRTC
+            send_message,
             close_peer_connection
         ])
         .run(tauri::generate_context!())
