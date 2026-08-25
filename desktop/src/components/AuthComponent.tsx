@@ -7,7 +7,7 @@ import { useWebsocketStore } from "../stores/webSocketStore";
 import { getWsToken } from "../api/auth";
 import { webSocketService } from "../services/websocketService";
 import { useNavigate } from "react-router-dom";
-import me from "../api/user";
+import { me } from "../api/user";
 import { env } from "../config/env";
 
 export default function AuthComponent() {

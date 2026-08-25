@@ -24,9 +24,7 @@ use websocket::manager::WebSocketManager;
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tracing_subscriber::fmt()
-        .with_env_filter(EnvFilter::new(
-            "desktop_lib=debug, server=debug,tokio_tungstenite=off",
-        ))
+        .with_env_filter(EnvFilter::new("desktop_lib=debug, tokio_tungstenite=off"))
         .init();
 
     let (event_tx, event_rx) = mpsc::channel::<DcEvent>(100);

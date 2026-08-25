@@ -11,6 +11,7 @@ import SearchResultList from "../components/HomeComponents/FriendSearchComponent
 import CommonButton from "../components/CommonButtons";
 import WsConnectionBox from "../components/UserComponents/WsConnectionBox";
 import IncomingChatRequests from "../components/HomeComponents/IncomingChatRequests";
+import ConnectedPeers from "../components/HomeComponents/ConnectedPeersComponents/ConnectedPeers";
 
 export default function HomePage() {
     const logout = useAuthStore((state) => state.logout);
@@ -50,6 +51,7 @@ export default function HomePage() {
                         <div className="flex w-1/2 flex-col gap-2 p-2">
                             <SearchBar />
                             <SearchResultList />
+                            <ConnectedPeers />
                         </div>
                         {/* Right sidebar for settings, logout, etc */}
                         <div className="flex min-h-full w-1/4 flex-col p-2 gap-2">
