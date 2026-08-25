@@ -3,8 +3,9 @@ use crate::utilities::{
     signalizer::Signaling,
 };
 use shared::models::websocket_models::{ClientEvent, IceCandidate};
-use std::sync::Arc;
+use std::{collections::HashMap, sync::Arc};
 use tokio::sync::mpsc;
+use tokio::sync::Mutex;
 use tracing::{debug, error, info};
 use uuid::Uuid;
 use webrtc::{
@@ -20,6 +21,7 @@ pub struct PeerHandler {
     pub peer_id: Uuid,
     pub signaling: Arc<dyn Signaling>,
     pub event_tx: mpsc::Sender<DcEvent>,
+    pub data_channels: Arc<Mutex<HashMap<Uuid, Arc<dyn DataChannel>>>>,
 }
 
 #[async_trait::async_trait]
@@ -73,6 +75,11 @@ impl PeerConnectionEventHandler for PeerHandler {
             error!("Invalid Data channel label");
             return;
         }
+
+        self.data_channels
+            .lock()
+            .await
+            .insert(self.peer_id, Arc::clone(&channel));
 
         let event_tx = self.event_tx.clone();
         let peer_id = self.peer_id;

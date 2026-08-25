@@ -18,7 +18,7 @@ pub struct WebRtcManager {
     peers: Mutex<HashMap<Uuid, Arc<dyn PeerConnection>>>,
     // Buffered ICE candidates
     pending_candidates: Mutex<HashMap<Uuid, Vec<IceCandidate>>>,
-    data_channels: Mutex<HashMap<Uuid, Arc<dyn DataChannel>>>,
+    data_channels: Arc<Mutex<HashMap<Uuid, Arc<dyn DataChannel>>>>,
     signaling: Arc<dyn Signaling>,
     event_tx: mpsc::Sender<DcEvent>,
 }
@@ -35,7 +35,7 @@ impl WebRtcManager {
         Self {
             peers: Mutex::new(HashMap::new()),
             pending_candidates: Mutex::new(HashMap::new()),
-            data_channels: Mutex::new(HashMap::new()),
+            data_channels: Arc::new(Mutex::new(HashMap::new())),
             signaling,
             event_tx,
         }
@@ -59,6 +59,7 @@ impl WebRtcManager {
             peer_id,
             signaling: Arc::clone(&self.signaling),
             event_tx: self.event_tx.clone(),
+            data_channels: Arc::clone(&self.data_channels),
         };
 
         // TODO: Optimization If existing connection is used, this is an unnecessary create

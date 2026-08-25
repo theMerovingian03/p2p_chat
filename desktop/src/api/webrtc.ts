@@ -1,8 +1,8 @@
 import { invoke } from "@tauri-apps/api/core";
 
-export async function sendMessage(peer_id: String, message: String) {
+export async function sendMessage(peerId: string, message: string) {
     try {
-        await invoke("send_message", { peer_id, message });
+        await invoke("send_message", { peerId, message });
     } catch (error) {
         console.log(error);
     }
