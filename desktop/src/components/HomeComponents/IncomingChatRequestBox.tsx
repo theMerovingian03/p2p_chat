@@ -57,13 +57,9 @@ export default function IncomingChatRequestBox({ id, from, username, createdAt, 
 
     return (
         <div ref={containerRef} className="relative">
-            <div className="flex cursor-pointer items-center gap-5 border-b border-white/20 p-3 text-white transition-colors duration-200 hover:bg-white/10">
-                <button
-                    onClick={(e) => setDialog({ visible: true, x: e.clientX, y: e.clientY })}
-                    className="cursor-pointer rounded px-2 py-1 text-sm transition-colors duration-200 hover:bg-white hover:text-blue-900"
-                >
-                    ⋮
-                </button>
+            <div className="flex cursor-pointer items-center gap-5 border-b border-white/20 p-3 text-white transition-colors duration-200 hover:bg-white/10"
+                onClick={(e) => setDialog({ visible: true, x: e.clientX + 10, y: e.clientY })}
+            >
                 <div className="flex flex-col gap-1">
                     <span>{username}</span>
                     <span className="text-xs text-white/50">Received on {new Date(createdAt).toLocaleDateString()}</span>
