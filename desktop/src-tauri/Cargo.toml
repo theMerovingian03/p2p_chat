@@ -21,6 +21,7 @@ tauri-build = { version = "2", features = [] }
 shared = { path = "../../shared" }
 
 bytes = "1.12.1"
+dashmap = "6.2.1"
 tauri = { version = "2", features = [] }
 tauri-plugin-opener = "2"
 keyring = "4.1.5"

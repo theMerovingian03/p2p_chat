@@ -1,24 +1,22 @@
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
-// mod token_store;
 mod app_state;
 mod commands;
+mod data_channel;
 mod utilities;
 mod webrtc;
 mod websocket;
 
 use crate::app_state::AppState;
-use crate::utilities::{
-    dc_events::{process_events, DcEvent},
-    signalizer::Signaling,
-};
+use crate::data_channel::dc_manager::DcManager;
+use crate::utilities::{dc_events::DcEvent, signalizer::Signaling};
 use crate::webrtc::manager::WebRtcManager;
 use commands::auth::*;
+use commands::data_channel::*;
 use commands::webrtc::*;
 use commands::websocket::*;
 use std::sync::Arc;
 use tokio::sync::mpsc;
 use tracing_subscriber::EnvFilter;
-// use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 use websocket::manager::WebSocketManager;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -31,17 +29,22 @@ pub fn run() {
 
     // Create WebSocket manager
     let ws_manager = Arc::new(WebSocketManager::new());
+
+    // Create DataChannel Mnanager
+    let dc_manager = Arc::new(DcManager::new(event_tx));
+
     // Create WebRTC Manager
     let webrtc_manager = Arc::new(WebRtcManager::new(
         // Anything that implements Singaling Trait
         // Create Arc pointer for WS manager
         Arc::clone(&ws_manager) as Arc<dyn Signaling>,
-        event_tx,
+        Arc::clone(&dc_manager),
     ));
 
     let app_state = AppState {
         websocket_manager: Arc::clone(&ws_manager),
         webrtc_manager: Arc::clone(&webrtc_manager),
+        dc_manager: Arc::clone(&dc_manager),
     };
 
     tauri::Builder::default()
@@ -50,8 +53,12 @@ pub fn run() {
         .setup(move |app| {
             // Set the app handle on the WebSocket manager so it can emit events
             ws_manager.set_app_handle(app.handle().clone());
-            // Spawn process to handle datachannel event
-            tauri::async_runtime::spawn(process_events(event_rx));
+            // Clone manager to...
+            let manager = Arc::clone(&dc_manager);
+            // ...spawn process to handle datachannel event
+            tauri::async_runtime::spawn(async move {
+                manager.process_events(event_rx).await;
+            });
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
@@ -66,8 +73,9 @@ pub fn run() {
             send_chat_request,
             accept_chat_request,
             // WebRTC
+            close_peer_connection,
+            // Data Channel
             send_message,
-            close_peer_connection
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

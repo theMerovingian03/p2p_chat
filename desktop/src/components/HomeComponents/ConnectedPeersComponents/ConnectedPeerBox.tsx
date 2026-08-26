@@ -1,4 +1,4 @@
-import { sendMessage } from "../../../api/webrtc";
+import { sendMessage } from "../../../api/data_channel";
 
 export default function ConnectedPeerBox() {
     return (

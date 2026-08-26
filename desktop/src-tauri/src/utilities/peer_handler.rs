@@ -1,10 +1,7 @@
-use crate::utilities::{
-    dc_events::{spawn_data_channel_listener, DcEvent},
-    signalizer::Signaling,
-};
+use crate::{data_channel::dc_manager::DcManager, utilities::signalizer::Signaling};
 use shared::models::websocket_models::{ClientEvent, IceCandidate};
 use std::sync::Arc;
-use tokio::sync::mpsc;
+// use tokio::sync::mpsc;
 use tracing::{debug, error, info};
 use uuid::Uuid;
 use webrtc::{
@@ -19,7 +16,7 @@ use webrtc::{
 pub struct PeerHandler {
     pub peer_id: Uuid,
     pub signaling: Arc<dyn Signaling>,
-    pub event_tx: mpsc::Sender<DcEvent>,
+    pub dc_manager: Arc<DcManager>,
 }
 
 #[async_trait::async_trait]
@@ -74,11 +71,12 @@ impl PeerConnectionEventHandler for PeerHandler {
             return;
         }
 
-        let event_tx = self.event_tx.clone();
+        // let event_tx = self.event_tx.clone();
         let peer_id = self.peer_id;
 
+        // Add data channel for current user(receiver) and listen
         debug!("Spawning data channel listener for receiver");
-        spawn_data_channel_listener(channel, event_tx, peer_id).await;
+        self.dc_manager.add_data_channel(peer_id, channel).await;
     }
 }
 
