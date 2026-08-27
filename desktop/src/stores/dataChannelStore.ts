@@ -29,6 +29,7 @@ export const useDataChannelStore = create<DataChannelStore>((set) => ({
     handleEvent: async (event) => {
         switch (event.type) {
             case "PeerConnected":
+                console.log(`Peer connected!: ${event.peer_id}`);
                 set((state) => {
                     if (state.connectedPeers.some(p => p.peerId === event.peer_id)) {
                         return state;

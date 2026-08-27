@@ -4,6 +4,7 @@ import Spinner from "./Spinner";
 import CommonButton from "./CommonButtons";
 import { useAuthStore } from "../stores/authStore";
 import { useWebsocketStore } from "../stores/webSocketStore";
+import { useDataChannelStore } from "../stores/dataChannelStore";
 import { getWsToken } from "../api/auth";
 import { webSocketService } from "../services/websocketService";
 import { useNavigate } from "react-router-dom";
@@ -16,6 +17,7 @@ export default function AuthComponent() {
     const user = useAuthStore((state) => state.user);
     const setUser = useAuthStore((state) => state.setUser);
     const initializeEventListeners = useWebsocketStore((state) => state.initializeEventListeners);
+    const initializeDcEventListener = useDataChannelStore((state) => state.initializeEventListener);
 
     const [initializing, setInitializing] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -37,6 +39,8 @@ export default function AuthComponent() {
             try {
                 // Initialize event listeners to receive WebSocket events from Rust
                 await initializeEventListeners();
+                // Initialize data channel event listener
+                await initializeDcEventListener();
 
                 if (!user) {
                     console.log("Fetching user details");
