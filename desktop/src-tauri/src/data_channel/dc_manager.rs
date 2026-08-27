@@ -1,7 +1,13 @@
-use crate::utilities::dc_events::{spawn_data_channel_listener, DcEvent};
+use crate::utilities::{
+    app_events::AppEvent,
+    dc_events::{spawn_data_channel_listener, DcEvent},
+};
 use bytes::BytesMut;
 use dashmap::DashMap;
+use parking_lot::Mutex;
+use serde_json::{json, Value};
 use std::sync::Arc;
+use tauri::Emitter;
 use tokio::sync::mpsc;
 use tracing::{debug, error, info};
 use uuid::Uuid;
@@ -9,6 +15,7 @@ use webrtc::data_channel::{DataChannel, DataChannelEvent};
 pub struct DcManager {
     pub channels: DashMap<Uuid, Arc<dyn DataChannel>>,
     pub event_tx: mpsc::Sender<DcEvent>,
+    pub app_handle: Arc<Mutex<Option<tauri::AppHandle>>>,
 }
 
 impl DcManager {
@@ -16,6 +23,21 @@ impl DcManager {
         Self {
             channels: DashMap::new(),
             event_tx,
+            app_handle: Arc::new(Mutex::new(None)),
+        }
+    }
+
+    pub fn set_app_handle(&self, app_handle: tauri::AppHandle) {
+        *self.app_handle.lock() = Some(app_handle);
+    }
+
+    /// Emit a Tauri event to the frontend
+    fn emit_event(&self, event_name: &str, payload: Value) {
+        // Avoid taking ownership
+        if let Some(app) = self.app_handle.lock().as_ref() {
+            if let Err(e) = app.emit(event_name, &payload) {
+                error!("Failed to emit event {}: {}", event_name, e);
+            }
         }
     }
 
@@ -36,6 +58,22 @@ impl DcManager {
     pub fn remove_data_channel(&self, peer_id: Uuid) {
         self.channels.remove(&peer_id);
     }
+
+    // pub fn has_channel(&self, peer_id: Uuid) -> bool {
+    //     self.channels.contains_key(&peer_id)
+    // }
+
+    // pub async fn connected_peers(&self) -> Vec<Uuid> {
+    //     let mut peers = Vec::new();
+    //     for entry in self.channels.iter() {
+    //         if let Ok(state) = entry.value().ready_state().await {
+    //             if state == RTCDataChannelState::Open {
+    //                 peers.push(*entry.key());
+    //             }
+    //         }
+    //     }
+    //     peers
+    // }
 
     pub async fn send_message(&self, peer_id: Uuid, message: Vec<u8>) -> Result<(), String> {
         let channel = self
@@ -58,12 +96,20 @@ impl DcManager {
         match event {
             DataChannelEvent::OnOpen => {
                 info!("Opened DataChannel on peer: {}", peer_id);
+                self.emit_event(
+                    "peer-connected",
+                    json!(&AppEvent::PeerConnected { peer_id }),
+                );
             }
             DataChannelEvent::OnClosing => {
                 info!("Closing DataChannel on peer: {}", peer_id);
             }
             DataChannelEvent::OnClose => {
                 info!("Closed DataChannel on peer: {}", peer_id);
+                self.emit_event(
+                    "peer-disconnected",
+                    json!(&AppEvent::PeerDisconnected { peer_id }),
+                );
             }
             DataChannelEvent::OnError => {
                 error!("Error occured on DataChannel");
@@ -72,6 +118,13 @@ impl DcManager {
                 info!(
                     "Message received on DataChannel of length: {}",
                     message.data.len()
+                );
+                self.emit_event(
+                    "message-received",
+                    json!(&AppEvent::MessageReceived {
+                        peer_id,
+                        message: message.data.to_vec(),
+                    }),
                 );
             }
             _ => {}

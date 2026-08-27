@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import SendChatRequestDialog from "./SendChatRequestDialog";
+import StatusIndicator from "../../StatusIndicator";
+// import { useWebsocketStore } from "../../../stores/webSocketStore";
 
 type FriendBoxProps = {
     username: string;
@@ -7,6 +9,7 @@ type FriendBoxProps = {
 };
 
 export default function FriendBox({ username, userId }: FriendBoxProps) {
+    // const isOnline = useWebsocketStore((state) => state.onlineUserIds.has(userId));
     const [dialog, setDialog] = useState<{ visible: boolean; x: number; y: number }>({
         visible: false,
         x: 0,
@@ -40,6 +43,8 @@ export default function FriendBox({ username, userId }: FriendBoxProps) {
                 onClick={(e) => setDialog({ visible: true, x: e.clientX + 10, y: e.clientY })}
             >
                 <div className="flex items-center gap-3">
+                    <StatusIndicator status={"connecting"} />
+                    {/* <StatusIndicator status={isOnline ? "connected" : "disconnected"} /> */}
                     <span>{username}</span>
                 </div>
             </div>

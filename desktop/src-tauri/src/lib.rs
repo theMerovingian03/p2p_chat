@@ -55,6 +55,7 @@ pub fn run() {
             ws_manager.set_app_handle(app.handle().clone());
             // Clone manager to...
             let manager = Arc::clone(&dc_manager);
+            manager.set_app_handle(app.handle().clone());
             // ...spawn process to handle datachannel event
             tauri::async_runtime::spawn(async move {
                 manager.process_events(event_rx).await;
