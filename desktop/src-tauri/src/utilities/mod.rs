@@ -1,4 +1,3 @@
-pub mod app_events;
 pub mod dc_events;
 pub mod peer_handler;
 pub mod signalizer;

@@ -15,6 +15,8 @@ export type CreateFriendReqRequest = {
 	receiver_id: string,
 };
 
+export type DataChannelAppEvent = { type: "PeerConnected"; peer_id: string } | { type: "PeerDisconnected"; peer_id: string } | { type: "MessageReceived"; peer_id: string; message: number[] };
+
 export type DeleteReqRequest = {
 	request_id: string,
 };

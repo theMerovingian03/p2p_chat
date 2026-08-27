@@ -1,11 +1,9 @@
-use crate::utilities::{
-    app_events::AppEvent,
-    dc_events::{spawn_data_channel_listener, DcEvent},
-};
+use crate::utilities::dc_events::{spawn_data_channel_listener, DcEvent};
 use bytes::BytesMut;
 use dashmap::DashMap;
 use parking_lot::Mutex;
 use serde_json::{json, Value};
+use shared::models::dc_models::DataChannelAppEvent as AppEvent;
 use std::sync::Arc;
 use tauri::Emitter;
 use tokio::sync::mpsc;
@@ -96,20 +94,14 @@ impl DcManager {
         match event {
             DataChannelEvent::OnOpen => {
                 info!("Opened DataChannel on peer: {}", peer_id);
-                self.emit_event(
-                    "peer-connected",
-                    json!(&AppEvent::PeerConnected { peer_id }),
-                );
+                self.emit_event("dc-event", json!(&AppEvent::PeerConnected { peer_id }));
             }
             DataChannelEvent::OnClosing => {
                 info!("Closing DataChannel on peer: {}", peer_id);
             }
             DataChannelEvent::OnClose => {
                 info!("Closed DataChannel on peer: {}", peer_id);
-                self.emit_event(
-                    "peer-disconnected",
-                    json!(&AppEvent::PeerDisconnected { peer_id }),
-                );
+                self.emit_event("dc-event", json!(&AppEvent::PeerDisconnected { peer_id }));
             }
             DataChannelEvent::OnError => {
                 error!("Error occured on DataChannel");
@@ -120,7 +112,7 @@ impl DcManager {
                     message.data.len()
                 );
                 self.emit_event(
-                    "message-received",
+                    "dc-event",
                     json!(&AppEvent::MessageReceived {
                         peer_id,
                         message: message.data.to_vec(),
