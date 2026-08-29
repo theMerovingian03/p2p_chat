@@ -68,18 +68,18 @@ export default function IncomingChatRequestBox({ id, from, username, createdAt, 
 
             {dialog.visible && (
                 <div className="fixed z-50" style={{ left: dialog.x, top: dialog.y }}>
-                    <div className="w-32 rounded border border-white/20 bg-white/10 text-sm text-white backdrop-blur-md">
+                    <div className="w-32 rounded-sm bg-white/10 text-sm text-white backdrop-blur-md">
                         <button
                             onClick={handleAccept}
                             disabled={loadingAccept}
-                            className="w-full p-2 text-left transition-colors duration-200 hover:bg-white hover:text-blue-900 disabled:cursor-default disabled:opacity-75"
+                            className="w-full p-2 text-left transition-colors duration-200 rounded-t-sm hover:bg-white hover:text-blue-900 disabled:cursor-default disabled:opacity-75"
                         >
                             {loadingAccept ? "Accepting..." : "Accept"}
                         </button>
                         <button
                             onClick={handleDecline}
                             disabled={loadingDecline}
-                            className="w-full p-2 text-left transition-colors duration-200 hover:bg-white hover:text-blue-900 disabled:cursor-default disabled:opacity-75"
+                            className="w-full p-2 text-left transition-colors duration-200 rounded-b-sm hover:bg-white hover:text-blue-900 disabled:cursor-default disabled:opacity-75"
                         >
                             {loadingDecline ? "Declining..." : "Decline"}
                         </button>

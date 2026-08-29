@@ -20,9 +20,9 @@ function App() {
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/login" element={< LoginPage />} />
           <Route path="/guest" element={<GuestLoginPage />} />
-          <Route path="/chat" element={<ChatPage />} />
           <Route element={<AuthComponent />}>
             <Route path="/home" element={<HomePage />} />
+            <Route path="/chat" element={<ChatPage />} />
           </Route>
         </Routes>
       </BrowserRouter>
