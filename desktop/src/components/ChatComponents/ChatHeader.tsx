@@ -1,6 +1,11 @@
 import { ArrowLeft } from "lucide-react"
 
-export default function ChatHeader({ onBack }: { onBack: () => void }) {
+type ChatHeaderProps = {
+    username: string;
+    onBack: () => void;
+}
+
+export default function ChatHeader({ username, onBack }: ChatHeaderProps) {
     return (
         <div className="flex h-10 w-full gap-1">
             <div
@@ -10,7 +15,7 @@ export default function ChatHeader({ onBack }: { onBack: () => void }) {
             </div>
             <div
                 className="flex h-full w-full flex-row items-center rounded-sm border border-white/20 backdrop-blur-2xl">
-                <span className="ml-2 text-white/70">Username</span>
+                <span className="ml-2 text-white/70">{username}</span>
             </div>
         </div>
     )
