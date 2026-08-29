@@ -2,6 +2,7 @@ import "./App.css";
 import RegisterPage from "./pages/Register";
 import LoginPage from "./pages/Login";
 import GuestLoginPage from "./pages/GuestLogin";
+import ChatPage from "./pages/Chat";
 import LoadingPage from "./pages/LoadingPage";
 import HomePage from "./pages/Home";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
@@ -19,6 +20,7 @@ function App() {
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/login" element={< LoginPage />} />
           <Route path="/guest" element={<GuestLoginPage />} />
+          <Route path="/chat" element={<ChatPage />} />
           <Route element={<AuthComponent />}>
             <Route path="/home" element={<HomePage />} />
           </Route>

@@ -30,6 +30,14 @@ export default function HomePage() {
         }
     }
 
+    function handleChat() {
+        try {
+            navigate("/chat");
+        } catch (err) {
+            console.log(err);
+        }
+    }
+
     return (
         <main>
             <div className="items-center">
@@ -59,6 +67,7 @@ export default function HomePage() {
                             < WsConnectionBox />
                             {/* <CommonButton>Change Alias</CommonButton> */}
                             <CommonButton onClick={handleLogOut}>Log Out</CommonButton>
+                            <CommonButton onClick={handleChat}>Preview Chat</CommonButton>
                             <IncomingChatRequests />
                             {error && <p className="text-white m-2">{error}</p>}
                         </div>
