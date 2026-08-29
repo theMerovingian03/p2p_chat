@@ -22,7 +22,7 @@ function App() {
           <Route path="/guest" element={<GuestLoginPage />} />
           <Route element={<AuthComponent />}>
             <Route path="/home" element={<HomePage />} />
-            <Route path="/chat" element={<ChatPage />} />
+            <Route path="/chat/:peerId" element={<ChatPage />} />
           </Route>
         </Routes>
       </BrowserRouter>

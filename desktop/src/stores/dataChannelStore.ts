@@ -7,7 +7,7 @@ type ConnectedPeer = {
     // username: string;
 }
 
-type ChatMessage = {
+export type ChatMessage = {
     id: string;
     peerId: string;
     content: string;
@@ -20,6 +20,8 @@ interface DataChannelStore {
     messages: Record<string, ChatMessage[]>;
     handleEvent: (event: DataChannelAppEvent) => Promise<void>;
     initializeEventListener: () => Promise<void>;
+    addMessage: (message: ChatMessage) => void;
+    addOutgoingMessage: (peerId: string, content: string) => void;
 }
 
 export const useDataChannelStore = create<DataChannelStore>((set) => ({
@@ -56,8 +58,16 @@ export const useDataChannelStore = create<DataChannelStore>((set) => ({
                 break;
 
             case "MessageReceived":
-                // TODO: add message to the appropriate conversation
-                console.log("Message received:", event.message);
+                set((state) => ({
+                    messages: {
+                        ...state.messages,
+                        [event.peer_id]: [...(state.messages[event.peer_id] ?? []), {
+                            id: crypto.randomUUID(),
+                            peerId: event.peer_id,
+                            content: new TextDecoder().decode(new Uint8Array(event.message)), timestamp: new Date().toISOString(), outgoing: false,
+                        }]
+                    }
+                }))
                 break;
             // case "MessageSendError":
             //     // TODO: handle/display error
@@ -74,5 +84,35 @@ export const useDataChannelStore = create<DataChannelStore>((set) => ({
         } catch {
             console.error("Failed to initialize event listener for Data Channel");
         }
-    }
+    },
+
+    addMessage: (message) => {
+        set((state) => ({
+            messages: {
+                ...state.messages,
+                [message.peerId]: [
+                    ...(state.messages[message.peerId] ?? []),
+                    message,
+                ]
+            }
+        }))
+    },
+
+    addOutgoingMessage: (peerId, content) => {
+        set((state) => ({
+            messages: {
+                ...state.messages,
+                [peerId]: [
+                    ...(state.messages[peerId] ?? []),
+                    {
+                        id: crypto.randomUUID(),
+                        peerId,
+                        content,
+                        timestamp: new Date().toISOString(),
+                        outgoing: true,
+                    },
+                ],
+            },
+        }));
+    },
 }));
