@@ -1,10 +1,12 @@
 import { useDataChannelStore } from "../../../stores/dataChannelStore";
+import { useFriendStore } from "../../../stores/friendStore";
 import ConnectedPeerBox from "./ConnectedPeerBox";
 import { Cable } from "lucide-react";
 
 export default function ConnectedPeers() {
 
     const connectedPeers = useDataChannelStore(state => state.connectedPeers);
+    const friends = useFriendStore((state) => state.friends);
 
     return (
         <div>
@@ -23,7 +25,7 @@ export default function ConnectedPeers() {
                             <ConnectedPeerBox
                                 key={peer.peerId}
                                 peerId={peer.peerId}
-                            // username={peer.username}
+                                username={friends[peer.peerId].username}
                             />
                         ))
                     )

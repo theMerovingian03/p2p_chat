@@ -4,9 +4,10 @@ import { useDataChannelStore } from "../../stores/dataChannelStore";
 
 interface ChatInputBoxProps {
     peerId: string;
+    username: string;
 }
 
-export default function ChatInputBox({ peerId }: ChatInputBoxProps) {
+export default function ChatInputBox({ peerId, username }: ChatInputBoxProps) {
     const [message, setMessage] = useState("");
 
     async function handleSend() {
@@ -37,7 +38,7 @@ export default function ChatInputBox({ peerId }: ChatInputBoxProps) {
                         handleSend();
                     }
                 }}
-                placeholder={`Message ${peerId}`}
+                placeholder={`Message ${username}`}
             />
         </div>
     )

@@ -2,10 +2,10 @@ import { useNavigate } from "react-router-dom";
 
 type ConnectedPeerBoxProps = {
     peerId: string;
-    // username: string;
+    username: string;
 }
 
-export default function ConnectedPeerBox({ peerId }: ConnectedPeerBoxProps) {
+export default function ConnectedPeerBox({ peerId, username }: ConnectedPeerBoxProps) {
     const navigate = useNavigate();
     return (
         <div
@@ -13,7 +13,7 @@ export default function ConnectedPeerBox({ peerId }: ConnectedPeerBoxProps) {
             onClick={() => navigate(`/chat/${peerId}`)}
         >
             <div className="flex items-center gap-3">
-                <span>{peerId}</span>
+                <span>{username}</span>
             </div>
         </div>
     )

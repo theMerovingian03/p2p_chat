@@ -9,10 +9,10 @@ export default function WsConnectionBox() {
             text: "Establishing connection...",
         },
         connected: {
-            text: "Connected",
+            text: "Online",
         },
         disconnected: {
-            text: "Disconnected",
+            text: "Offline",
         },
     }[status];
 

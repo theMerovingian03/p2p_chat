@@ -6,6 +6,7 @@ import { useAuthStore } from "../stores/authStore";
 import { getWsToken } from "../api/auth";
 import { webSocketService } from "../services/websocketService";
 import { useNavigate } from "react-router-dom";
+import { useFriendStore } from "../stores/friendStore";
 import { me } from "../api/user";
 import { env } from "../config/env";
 
@@ -14,6 +15,7 @@ export default function AuthComponent() {
     const navigate = useNavigate();
     const user = useAuthStore((state) => state.user);
     const setUser = useAuthStore((state) => state.setUser);
+    const initializeFriends = useFriendStore((state) => state.initializeFriends);
 
     const [initializing, setInitializing] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -43,6 +45,11 @@ export default function AuthComponent() {
                     console.log("Fetched user details successfully!");
                 }
 
+                // Initialize friend list
+                console.log("Initializing friends");
+                await initializeFriends();
+                console.log("Loaded friend list!");
+
                 // Get websocket token.
                 console.log("Requesting WS Token")
                 const { ws_token } = await getWsToken();
@@ -70,7 +77,7 @@ export default function AuthComponent() {
             cancelled = true;
             void webSocketService.disconnect();
         };
-    }, [setUser, user]);
+    }, [setUser, user, initializeFriends]);
 
     if (initializing) {
         return (
