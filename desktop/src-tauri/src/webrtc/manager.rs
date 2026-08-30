@@ -6,7 +6,7 @@ use crate::websocket::manager::WebSocketManager;
 use shared::models::websocket_models::{ClientEvent, IceCandidate};
 use std::{collections::HashMap, sync::Arc};
 use tokio::sync::Mutex;
-use tracing::debug;
+use tracing::{debug, error};
 use uuid::Uuid;
 use webrtc::peer_connection::{PeerConnection, RTCIceCandidateInit, RTCSessionDescription};
 
@@ -224,5 +224,22 @@ impl WebRtcManager {
             .await
             .map_err(|e| e.to_string())?;
         Ok(())
+    }
+
+    pub async fn clear(&self) {
+        let peers = {
+            let mut peers = self.peers.lock().await;
+            peers.drain().collect::<Vec<_>>()
+        };
+
+        for (peer_id, pc) in peers {
+            if let Err(e) = pc.close().await {
+                error!(
+                    peer_id = %peer_id,
+                    error = %e,
+                    "Failed to close peer connection!"
+                );
+            }
+        }
     }
 }

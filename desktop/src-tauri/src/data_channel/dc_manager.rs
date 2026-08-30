@@ -123,4 +123,27 @@ impl DcManager {
             _ => {}
         }
     }
+
+    pub async fn clear(&self) {
+        // Collect channels first
+        info!("Clearing data channels");
+        let channels: Vec<_> = self
+            .channels
+            .iter()
+            .map(|entry| (*entry.key(), Arc::clone(entry.value())))
+            .collect();
+
+        // Clear main object channels
+        self.channels.clear();
+
+        for (peer_id, channel) in channels.iter() {
+            if let Err(e) = channel.close().await {
+                error!(
+                    peer_id = %peer_id,
+                    error = %e,
+                    "Failed to close data channel!"
+                );
+            }
+        }
+    }
 }

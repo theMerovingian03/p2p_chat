@@ -12,6 +12,7 @@ use crate::utilities::{dc_events::DcEvent, signalizer::Signaling};
 use crate::webrtc::manager::WebRtcManager;
 use commands::auth::*;
 use commands::data_channel::*;
+use commands::logout_cleanup;
 use commands::webrtc::*;
 use commands::websocket::*;
 use std::sync::Arc;
@@ -77,6 +78,8 @@ pub fn run() {
             close_peer_connection,
             // Data Channel
             send_message,
+            // Logout
+            logout_cleanup,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
