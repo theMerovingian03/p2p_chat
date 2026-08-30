@@ -17,7 +17,7 @@ export default function MessageList({ peerId }: MessageListProps) {
     ) ?? EMPTY_MESSAGES;
 
     return (
-        <div className="max-h-120 shrink-0 scroll-smooth no-scrollbar w-full rounded-sm overflow-y-auto">
+        <div className="h-120 shrink-0 scroll-smooth no-scrollbar w-full rounded-sm overflow-y-auto">
             {messages.map((message) => message.outgoing ? (
                 <OutgoingMessage key={message.id} message={message.content} />
             ) : (
