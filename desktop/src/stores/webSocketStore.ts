@@ -117,6 +117,8 @@ export const useWebsocketStore = create<WebsocketState>((set) => ({
             return;
         }
 
+        listenersInitialized = true;
+
         try {
             // Listen for server events from Rust WebSocket manager
             // target is ws-event
@@ -132,13 +134,12 @@ export const useWebsocketStore = create<WebsocketState>((set) => ({
                 }
             );
 
-            listenersInitialized = true;
-
             // Listeners are active for the lifetime of the app.
             // Uncomment below to store unlisten functions for cleanup if needed:
             // return { _unlistenEvent, _unlistenStatus }
         } catch (error) {
             console.error("Failed to initialize WebSocket event listeners:", error);
+            listenersInitialized = false;
         }
     },
 }));

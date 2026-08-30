@@ -84,15 +84,17 @@ export const useDataChannelStore = create<DataChannelStore>((set) => ({
             return;
         }
 
+        listenerInitialized = true;
+
         try {
             await listen<DataChannelAppEvent>("dc-event", (event) => {
                 useDataChannelStore.getState().handleEvent(event.payload);
             })
 
-            listenerInitialized = true;
 
         } catch {
             console.error("Failed to initialize event listener for Data Channel");
+            listenerInitialized = false;
         }
     },
 
