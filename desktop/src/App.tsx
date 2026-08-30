@@ -20,8 +20,8 @@ function App() {
   const initializeWsListener = useWebsocketStore((state) => state.initializeEventListeners);
 
   useEffect(() => {
-    void initializeDcListener;
-    void initializeWsListener;
+    void initializeDcListener();
+    void initializeWsListener();
   }, [initializeDcListener, initializeWsListener])
 
   return (

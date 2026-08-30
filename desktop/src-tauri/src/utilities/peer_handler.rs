@@ -57,9 +57,18 @@ impl PeerConnectionEventHandler for PeerHandler {
             RTCPeerConnectionState::New => info!("New peer connection established!"),
             RTCPeerConnectionState::Connected => info!("Peer connected!"),
             RTCPeerConnectionState::Connecting => info!("Connecting to peer..."),
-            RTCPeerConnectionState::Disconnected => info!("Peer disconnected."),
-            RTCPeerConnectionState::Failed => error!("Peer connection failed"),
-            RTCPeerConnectionState::Closed => info!("Closed peer connection"),
+            RTCPeerConnectionState::Disconnected => {
+                info!("Peer disconnected: {}", self.peer_id);
+                self.dc_manager.remove_data_channel(self.peer_id);
+            }
+            RTCPeerConnectionState::Failed => {
+                error!("Peer connection failed: {}", self.peer_id);
+                self.dc_manager.remove_data_channel(self.peer_id);
+            }
+            RTCPeerConnectionState::Closed => {
+                info!("Closed peer connection: {}", self.peer_id);
+                self.dc_manager.remove_data_channel(self.peer_id);
+            }
             _ => {}
         }
     }

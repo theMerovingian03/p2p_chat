@@ -36,7 +36,7 @@ export const useDataChannelStore = create<DataChannelStore>((set) => ({
                 console.log(`Peer connected!: ${event.peer_id}`);
                 set((state) => {
                     if (state.connectedPeers.some(p => p.peerId === event.peer_id)) {
-                        return state;
+                        return {};
                     }
 
                     return {
@@ -52,6 +52,7 @@ export const useDataChannelStore = create<DataChannelStore>((set) => ({
                 break;
 
             case "PeerDisconnected":
+                console.log(`Peer disconnected: ${event.peer_id}`);
                 set((state) => ({
                     connectedPeers: state.connectedPeers.filter(
                         p => p.peerId !== event.peer_id
@@ -81,12 +82,14 @@ export const useDataChannelStore = create<DataChannelStore>((set) => ({
     initializeEventListener: async () => {
 
         if (listenerInitialized) {
+            console.log("Dc Listener already initialized");
             return;
         }
 
         listenerInitialized = true;
 
         try {
+            console.log("Initializing DC listener");
             await listen<DataChannelAppEvent>("dc-event", (event) => {
                 useDataChannelStore.getState().handleEvent(event.payload);
             })

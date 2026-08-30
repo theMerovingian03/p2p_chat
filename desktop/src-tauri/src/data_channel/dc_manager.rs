@@ -55,6 +55,7 @@ impl DcManager {
 
     pub fn remove_data_channel(&self, peer_id: Uuid) {
         self.channels.remove(&peer_id);
+        self.emit_event("dc-event", json!(&AppEvent::PeerDisconnected { peer_id }));
     }
 
     // pub fn has_channel(&self, peer_id: Uuid) -> bool {

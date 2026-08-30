@@ -114,12 +114,14 @@ export const useWebsocketStore = create<WebsocketState>((set) => ({
     initializeEventListeners: async () => {
 
         if (listenersInitialized) {
+            console.log("WS listener already initialized")
             return;
         }
 
         listenersInitialized = true;
 
         try {
+            console.log("Iinitalizing WS listener")
             // Listen for server events from Rust WebSocket manager
             // target is ws-event
             await listen<ServerEvent>("ws-event", (event) => {
