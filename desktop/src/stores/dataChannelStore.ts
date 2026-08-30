@@ -22,6 +22,7 @@ interface DataChannelStore {
     initializeEventListener: () => Promise<void>;
     addMessage: (message: ChatMessage) => void;
     addOutgoingMessage: (peerId: string, content: string) => void;
+    clear: () => void;
 }
 
 let listenerInitialized = false;
@@ -129,5 +130,12 @@ export const useDataChannelStore = create<DataChannelStore>((set) => ({
                 ],
             },
         }));
+    },
+
+    clear: () => {
+        set({
+            connectedPeers: [],
+            messages: {}
+        })
     },
 }));
