@@ -24,6 +24,8 @@ interface DataChannelStore {
     addOutgoingMessage: (peerId: string, content: string) => void;
 }
 
+let listenerInitialized = false;
+
 export const useDataChannelStore = create<DataChannelStore>((set) => ({
     connectedPeers: [],
     messages: {},
@@ -58,6 +60,7 @@ export const useDataChannelStore = create<DataChannelStore>((set) => ({
                 break;
 
             case "MessageReceived":
+                console.log("Received message!");
                 set((state) => ({
                     messages: {
                         ...state.messages,
@@ -76,10 +79,17 @@ export const useDataChannelStore = create<DataChannelStore>((set) => ({
     },
 
     initializeEventListener: async () => {
+
+        if (listenerInitialized) {
+            return;
+        }
+
         try {
             await listen<DataChannelAppEvent>("dc-event", (event) => {
                 useDataChannelStore.getState().handleEvent(event.payload);
             })
+
+            listenerInitialized = true;
 
         } catch {
             console.error("Failed to initialize event listener for Data Channel");

@@ -9,8 +9,21 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import TitleBar from "./components/TitleBar";
 import Footer from "./components/Footer";
 import AuthComponent from "./components/AuthComponent";
+import { useWebsocketStore } from "./stores/webSocketStore";
+import { useDataChannelStore } from "./stores/dataChannelStore";
+import { useEffect } from "react";
 
 function App() {
+
+  // Initialize listeners at the app level to prevent duplicate.
+  const initializeDcListener = useDataChannelStore((state) => state.initializeEventListener);
+  const initializeWsListener = useWebsocketStore((state) => state.initializeEventListeners);
+
+  useEffect(() => {
+    void initializeDcListener;
+    void initializeWsListener;
+  }, [initializeDcListener, initializeWsListener])
+
   return (
     <>
       <TitleBar />

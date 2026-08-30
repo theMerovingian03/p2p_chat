@@ -24,6 +24,8 @@ interface WebsocketState {
     initializeEventListeners: () => Promise<void>;
 }
 
+let listenersInitialized = false;
+
 export const useWebsocketStore = create<WebsocketState>((set) => ({
     status: "disconnected",
     onlineUserIds: new Set<string>(),
@@ -110,6 +112,11 @@ export const useWebsocketStore = create<WebsocketState>((set) => ({
     },
 
     initializeEventListeners: async () => {
+
+        if (listenersInitialized) {
+            return;
+        }
+
         try {
             // Listen for server events from Rust WebSocket manager
             // target is ws-event
@@ -124,6 +131,8 @@ export const useWebsocketStore = create<WebsocketState>((set) => ({
                     useWebsocketStore.getState().setStatus(event.payload.status);
                 }
             );
+
+            listenersInitialized = true;
 
             // Listeners are active for the lifetime of the app.
             // Uncomment below to store unlisten functions for cleanup if needed:
