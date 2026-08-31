@@ -3,10 +3,10 @@ import { useEffect, useState } from "react";
 import Spinner from "./Spinner";
 import CommonButton from "./CommonButtons";
 import { useAuthStore } from "../stores/authStore";
-import { useWebsocketStore } from "../stores/webSocketStore";
 import { getWsToken } from "../api/auth";
 import { webSocketService } from "../services/websocketService";
 import { useNavigate } from "react-router-dom";
+import { useFriendStore } from "../stores/friendStore";
 import { me } from "../api/user";
 import { env } from "../config/env";
 
@@ -15,7 +15,7 @@ export default function AuthComponent() {
     const navigate = useNavigate();
     const user = useAuthStore((state) => state.user);
     const setUser = useAuthStore((state) => state.setUser);
-    const initializeEventListeners = useWebsocketStore((state) => state.initializeEventListeners);
+    const initializeFriends = useFriendStore((state) => state.initializeFriends);
 
     const [initializing, setInitializing] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -35,9 +35,6 @@ export default function AuthComponent() {
 
         async function initialize() {
             try {
-                // Initialize event listeners to receive WebSocket events from Rust
-                await initializeEventListeners();
-
                 if (!user) {
                     console.log("Fetching user details");
                     const currentUser = await me();
@@ -47,6 +44,11 @@ export default function AuthComponent() {
                     setUser(currentUser);
                     console.log("Fetched user details successfully!");
                 }
+
+                // Initialize friend list
+                console.log("Initializing friends");
+                await initializeFriends();
+                console.log("Loaded friend list!");
 
                 // Get websocket token.
                 console.log("Requesting WS Token")
@@ -75,7 +77,7 @@ export default function AuthComponent() {
             cancelled = true;
             void webSocketService.disconnect();
         };
-    }, [initializeEventListeners, setUser, user]);
+    }, [setUser, user, initializeFriends]);
 
     if (initializing) {
         return (

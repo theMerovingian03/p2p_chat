@@ -64,9 +64,9 @@ export default function IncomingFriendRequestBox({ id, username, createdAt, onAc
 
             {dialog.visible && (
                 <div className="fixed z-50" style={{ left: dialog.x, top: dialog.y }}>
-                    <div className="w-32 rounded border border-white/20 text-sm bg-white/10 text-white backdrop-blur-md">
-                        <button onClick={handleAccept} disabled={loadingAccept} className="w-full p-2 text-left transition-colors duration-200 hover:bg-white hover:text-blue-900">{loadingAccept ? 'Accepting...' : 'Accept'}</button>
-                        <button onClick={handleDecline} disabled={loadingDecline} className="w-full p-2 text-left transition-colors duration-200 hover:bg-white hover:text-blue-900">{loadingDecline ? 'Declining...' : 'Decline'}</button>
+                    <div className="w-32 rounded-sm text-sm bg-white/10 text-white backdrop-blur-md">
+                        <button onClick={handleAccept} disabled={loadingAccept} className="w-full p-2 text-left transition-colors rounded-t-sm duration-200 hover:bg-white hover:text-blue-900">{loadingAccept ? 'Accepting...' : 'Accept'}</button>
+                        <button onClick={handleDecline} disabled={loadingDecline} className="w-full p-2 text-left transition-colors rounded-b-sm duration-200 hover:bg-white hover:text-blue-900">{loadingDecline ? 'Declining...' : 'Decline'}</button>
                     </div>
                 </div>
             )}

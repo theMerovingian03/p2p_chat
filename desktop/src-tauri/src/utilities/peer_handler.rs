@@ -1,11 +1,7 @@
-use crate::utilities::{
-    dc_events::{spawn_data_channel_listener, DcEvent},
-    signalizer::Signaling,
-};
+use crate::{data_channel::dc_manager::DcManager, utilities::signalizer::Signaling};
 use shared::models::websocket_models::{ClientEvent, IceCandidate};
-use std::{collections::HashMap, sync::Arc};
-use tokio::sync::mpsc;
-use tokio::sync::Mutex;
+use std::sync::Arc;
+// use tokio::sync::mpsc;
 use tracing::{debug, error, info};
 use uuid::Uuid;
 use webrtc::{
@@ -20,8 +16,7 @@ use webrtc::{
 pub struct PeerHandler {
     pub peer_id: Uuid,
     pub signaling: Arc<dyn Signaling>,
-    pub event_tx: mpsc::Sender<DcEvent>,
-    pub data_channels: Arc<Mutex<HashMap<Uuid, Arc<dyn DataChannel>>>>,
+    pub dc_manager: Arc<DcManager>,
 }
 
 #[async_trait::async_trait]
@@ -62,9 +57,18 @@ impl PeerConnectionEventHandler for PeerHandler {
             RTCPeerConnectionState::New => info!("New peer connection established!"),
             RTCPeerConnectionState::Connected => info!("Peer connected!"),
             RTCPeerConnectionState::Connecting => info!("Connecting to peer..."),
-            RTCPeerConnectionState::Disconnected => info!("Peer disconnected."),
-            RTCPeerConnectionState::Failed => error!("Peer connection failed"),
-            RTCPeerConnectionState::Closed => info!("Closed peer connection"),
+            RTCPeerConnectionState::Disconnected => {
+                info!("Peer disconnected: {}", self.peer_id);
+                self.dc_manager.remove_data_channel(self.peer_id);
+            }
+            RTCPeerConnectionState::Failed => {
+                error!("Peer connection failed: {}", self.peer_id);
+                self.dc_manager.remove_data_channel(self.peer_id);
+            }
+            RTCPeerConnectionState::Closed => {
+                info!("Closed peer connection: {}", self.peer_id);
+                self.dc_manager.remove_data_channel(self.peer_id);
+            }
             _ => {}
         }
     }
@@ -76,16 +80,12 @@ impl PeerConnectionEventHandler for PeerHandler {
             return;
         }
 
-        self.data_channels
-            .lock()
-            .await
-            .insert(self.peer_id, Arc::clone(&channel));
-
-        let event_tx = self.event_tx.clone();
+        // let event_tx = self.event_tx.clone();
         let peer_id = self.peer_id;
 
+        // Add data channel for current user(receiver) and listen
         debug!("Spawning data channel listener for receiver");
-        spawn_data_channel_listener(channel, event_tx, peer_id).await;
+        self.dc_manager.add_data_channel(peer_id, channel).await;
     }
 }
 

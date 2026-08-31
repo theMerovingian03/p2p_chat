@@ -2,6 +2,7 @@ use shared::models::auth_models::{
     AuthResponse, LoginRequest, RefreshSessionRequest, RefreshSessionResponse, RegisterRequest,
     UserDto, WsAuth,
 };
+use shared::models::dc_models::DataChannelAppEvent;
 use shared::models::friend_models::*;
 use shared::models::user_models::{UserSearchModel, UserSearchRequestModel};
 use shared::models::websocket_models::{ClientEvent, ServerEvent};
@@ -24,6 +25,7 @@ pub fn main() {
         .register::<ServerEvent>()
         .register::<ClientEvent>()
         .register::<UserSearchRequestModel>()
+        .register::<DataChannelAppEvent>()
         .register::<UserDto>()
         .register::<WsAuth>();
 

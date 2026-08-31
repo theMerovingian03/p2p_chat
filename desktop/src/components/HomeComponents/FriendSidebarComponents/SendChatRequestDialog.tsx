@@ -38,11 +38,11 @@ export default function SendChatRequestDialog({ username, userId, onClose }: Sen
 
     return (
         <div
-            className="flex w-80 flex-col rounded-sm border border-white/20 bg-white/10 text-white shadow-xl backdrop-blur-md text-sm"
+            className="flex w-60 flex-col rounded-sm  bg-white/10 text-white shadow-lg backdrop-blur-md text-sm p-1"
         >
-            <span className="m-2">Send a chat request to {username}?</span>
-            {error && <span className="mx-2 text-sm text-red-300">{error}</span>}
-            <div className="m-2 flex gap-5">
+            <span className="mx-2 mt-2">Send a chat request to {username}?</span>
+            {error && <span className="mx-1 text-sm text-red-300">{error}</span>}
+            <div className="m-2 flex gap-3">
                 <button
                     disabled={loading || success}
                     onClick={handleSendRequest}

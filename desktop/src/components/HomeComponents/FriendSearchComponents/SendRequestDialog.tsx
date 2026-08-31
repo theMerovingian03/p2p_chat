@@ -39,13 +39,13 @@ export default function SendFriendRequestDialog({ username, userId, onClose }: S
     }, [success, onClose]);
 
     return (
-        <div className="flex w-80 flex-col rounded-sm border border-white/20 bg-white/10 text-white backdrop-blur-md
+        <div className="flex w-60 flex-col rounded-sm bg-white/10 text-white backdrop-blur-md
         shadow-xl">
-            <span className="m-2">{username} is not in your contacts. Add as friend?</span>
+            <span className="mx-2 mt-2">{username} is not in your contacts. Add as friend?</span>
             {error && (
                 <span className="mx-2 text-sm text-red-300">{error}</span>
             )}
-            <div className="m-2 flex gap-5">
+            <div className="m-2 flex gap-3">
                 <button
                     disabled={loading || success}
                     onClick={handleSendRequest}

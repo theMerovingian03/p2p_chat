@@ -12,9 +12,11 @@ import CommonButton from "../components/CommonButtons";
 import WsConnectionBox from "../components/UserComponents/WsConnectionBox";
 import IncomingChatRequests from "../components/HomeComponents/IncomingChatRequests";
 import ConnectedPeers from "../components/HomeComponents/ConnectedPeersComponents/ConnectedPeers";
+import { useDataChannelStore } from "../stores/dataChannelStore";
 
 export default function HomePage() {
     const logout = useAuthStore((state) => state.logout);
+    const clearDcStore = useDataChannelStore((state) => state.clear);
     const [error, setError] = useState("");
     const [viewMode, setViewMode] = useState<"friends" | "requests">("friends");
     const navigate = useNavigate();
@@ -23,6 +25,7 @@ export default function HomePage() {
     async function handleLogOut() {
         try {
             logout();
+            clearDcStore();
             navigate("/login", { replace: true });
         } catch (err) {
             setError("An error occured!");

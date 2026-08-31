@@ -1,16 +1,19 @@
 ﻿import FriendBox from "./FriendBox";
 import RequestBox from "./RequestBox";
 import { useEffect, useState } from "react";
-import { FriendRequestRowDto, FriendRowDto } from "../../../generated/bindings";
-import { getFriends, getSentFriendRequests } from "../../../api/friend";
+import { FriendRequestRowDto } from "../../../generated/bindings";
+import { getSentFriendRequests } from "../../../api/friend";
 import Spinner from "../../Spinner";
+import { useFriendStore } from "../../../stores/friendStore";
 
 type FriendListProps = {
     view: "friends" | "requests";
 };
 
 export default function FriendList({ view }: FriendListProps) {
-    const [friends, setFriends] = useState<FriendRowDto[]>([]);
+    // const [friends, setFriends] = useState<FriendRowDto[]>([]);
+    const friends = useFriendStore((state) => state.friends);
+
     const [requests, setRequests] = useState<FriendRequestRowDto[]>([]);
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
@@ -27,12 +30,13 @@ export default function FriendList({ view }: FriendListProps) {
             if (view === "requests") {
                 const sentRequests = await getSentFriendRequests();
                 setRequests(sentRequests ?? []);
-                setFriends([]);
-            } else {
-                const friendList = await getFriends();
-                setFriends(friendList ?? []);
-                setRequests([]);
+                // setFriends([]);
             }
+            // else {
+            //     const friendList = await getFriends();
+            //     setFriends(friendList ?? []);
+            //     setRequests([]);
+            // }
         } catch (err) {
             console.error(err);
             setError("Unable to load data.");
@@ -68,11 +72,11 @@ export default function FriendList({ view }: FriendListProps) {
                         />
                     ))
                 )
-            ) : friends.length === 0 ? (
+            ) : Object.values(friends).length === 0 ? (
                 <div className="p-4 text-sm text-white/70">{emptyMessage}</div>
             ) : (
-                friends.map((friend) => (
-                    <FriendBox key={friend.friend_id} username={friend.username} userId={friend.friend_id} />
+                Object.values(friends).map((friend) => (
+                    <FriendBox key={friend.friend_id} username={friend.username} userId={friend.friend_id} isOnline={friend.isOnline} />
                 ))
             )}
         </div>

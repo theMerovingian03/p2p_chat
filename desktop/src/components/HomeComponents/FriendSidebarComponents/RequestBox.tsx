@@ -53,7 +53,7 @@ export default function RequestBox({ id, username, createdAt, onDelete }: Reques
                     className="fixed z-50"
                     style={{ left: dialog.x, top: dialog.y }}
                 >
-                    <div className="w-32 rounded border border-white/20 text-sm bg-white/10 p-1 text-white transition-colors duration-200 hover:bg-white hover:text-blue-900 backdrop-blur-md">
+                    <div className="w-32 rounded text-sm bg-white/10 p-1 text-white transition-colors duration-200 hover:bg-white hover:text-blue-900 backdrop-blur-md">
                         <button onClick={handleDecline} disabled={loading} className="w-full text-left px-2 py-1">{loading ? 'Cancelling...' : 'Cancel'}</button>
                     </div>
                 </div>

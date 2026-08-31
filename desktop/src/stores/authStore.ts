@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import type { UserDto } from "../generated/bindings";
 import { deleteRefreshToken } from "./tokenStore";
+import { invoke } from "@tauri-apps/api/core";
 
 interface AuthState {
     accessToken: string | null;
@@ -8,6 +9,14 @@ interface AuthState {
     setAccessToken: (token: string | null) => void;
     setUser: (user: UserDto | null) => void;
     logout: () => void;
+}
+
+async function logoutCleanup() {
+    try {
+        await invoke("logout_cleanup");
+    } catch (err) {
+        console.log("Error occured while cleaning up on logout!", err);
+    }
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
@@ -26,6 +35,7 @@ export const useAuthStore = create<AuthState>((set) => ({
 
     logout: async () => {
         await deleteRefreshToken()
+        await logoutCleanup()
 
         set({
             accessToken: null,
