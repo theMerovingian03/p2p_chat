@@ -2,6 +2,10 @@
 
 A hybrid Peer2Peer chat application powered by Rust and TypeScript. 
 
+Axum powers the central signaling server which handles authentication, peer discovery, relays appropriate requests, events and runs guest account cleanup.
+
+Tauri provides the critical functions such as token persistence and interactivity between Typescript components and Rust utilities for sockets, webrtc, data channel handling, etc.
+
 ## Installation
 ### Prerequisites
 1. Rust ```rustc 1.96.0```
