@@ -24,7 +24,8 @@ pub async fn handle_socket(
     // Outgoing: Convert ServerEvent to Message::Text(...)
     // Incoming: Parse Message::Text(...) to ClientEvent
     let (tx, mut rx) = tokio::sync::mpsc::channel::<ServerEvent>(100);
-    connection_manager.connect(user_id, tx);
+    let conn_id = Uuid::new_v4();
+    connection_manager.connect(user_id, tx, conn_id);
 
     loop {
         // Run branches concurrently
@@ -89,7 +90,7 @@ pub async fn handle_socket(
         }
     }
 
-    connection_manager.disconnect(&user_id);
+    connection_manager.disconnect(&user_id, &conn_id);
 }
 
 pub async fn handle_client_event(

@@ -3,6 +3,7 @@ use tauri::State;
 use uuid::Uuid;
 
 #[tauri::command]
+// TODO: Invoke this for "End Chat"
 pub async fn close_peer_connection(
     peer_id: String,
     state: State<'_, AppState>,

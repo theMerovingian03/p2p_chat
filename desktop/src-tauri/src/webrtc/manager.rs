@@ -5,7 +5,7 @@ use crate::utilities::signalizer::Signaling;
 use crate::websocket::manager::WebSocketManager;
 use shared::models::websocket_models::{ClientEvent, IceCandidate};
 use std::{collections::HashMap, sync::Arc};
-use tokio::sync::Mutex;
+use tokio::sync::{mpsc, Mutex};
 use tracing::{debug, error};
 use uuid::Uuid;
 use webrtc::peer_connection::{PeerConnection, RTCIceCandidateInit, RTCSessionDescription};
@@ -16,6 +16,7 @@ pub struct WebRtcManager {
     pending_candidates: Mutex<HashMap<Uuid, Vec<IceCandidate>>>,
     dc_manager: Arc<DcManager>,
     signaling: Arc<dyn Signaling>,
+    cleanup_tx: mpsc::Sender<Uuid>,
 }
 
 #[async_trait::async_trait]
@@ -26,13 +27,32 @@ impl Signaling for WebSocketManager {
 }
 
 impl WebRtcManager {
-    pub fn new(signaling: Arc<dyn Signaling>, dc_manager: Arc<DcManager>) -> Self {
-        Self {
+    pub fn new(signaling: Arc<dyn Signaling>, dc_manager: Arc<DcManager>) -> Arc<Self> {
+        let (cleanup_tx, mut cleanup_rx) = mpsc::channel::<Uuid>(100);
+
+        let manager = Arc::new(Self {
             peers: Mutex::new(HashMap::new()),
             pending_candidates: Mutex::new(HashMap::new()),
             dc_manager,
             signaling,
-        }
+            cleanup_tx,
+        });
+
+        let manager_clone = Arc::clone(&manager);
+
+        tokio::spawn(async move {
+            while let Some(peer_id) = cleanup_rx.recv().await {
+                if let Err(error) = manager_clone.cleanup_peer_connection(peer_id).await {
+                    error!(
+                        peer_id = %peer_id,
+                        %error,
+                        "Failed to cleanup peer connection"
+                    );
+                }
+            }
+        });
+
+        manager
     }
     // Helper to check if peer connection already exists
     async fn get_or_create_peer_connection(
@@ -53,6 +73,7 @@ impl WebRtcManager {
             peer_id,
             signaling: Arc::clone(&self.signaling),
             dc_manager: Arc::clone(&self.dc_manager),
+            cleanup_tx: self.cleanup_tx.clone(),
         };
 
         // TODO: Optimization If existing connection is used, this is an unnecessary create

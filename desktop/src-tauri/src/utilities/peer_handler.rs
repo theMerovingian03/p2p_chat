@@ -1,7 +1,7 @@
 use crate::{data_channel::dc_manager::DcManager, utilities::signalizer::Signaling};
 use shared::models::websocket_models::{ClientEvent, IceCandidate};
 use std::sync::Arc;
-// use tokio::sync::mpsc;
+use tokio::sync::mpsc;
 use tracing::{debug, error, info};
 use uuid::Uuid;
 use webrtc::{
@@ -17,6 +17,7 @@ pub struct PeerHandler {
     pub peer_id: Uuid,
     pub signaling: Arc<dyn Signaling>,
     pub dc_manager: Arc<DcManager>,
+    pub cleanup_tx: mpsc::Sender<Uuid>,
 }
 
 #[async_trait::async_trait]
@@ -54,7 +55,7 @@ impl PeerConnectionEventHandler for PeerHandler {
     // TODO: Cleanup, retry, etc.
     async fn on_connection_state_change(&self, state: RTCPeerConnectionState) {
         match state {
-            RTCPeerConnectionState::New => info!("New peer connection established!"),
+            RTCPeerConnectionState::New => info!("New peer connection available!"),
             RTCPeerConnectionState::Connected => info!("Peer connected!"),
             RTCPeerConnectionState::Connecting => info!("Connecting to peer..."),
             RTCPeerConnectionState::Disconnected => {
@@ -63,11 +64,13 @@ impl PeerConnectionEventHandler for PeerHandler {
             }
             RTCPeerConnectionState::Failed => {
                 error!("Peer connection failed: {}", self.peer_id);
+                let _ = self.cleanup_tx.send(self.peer_id).await;
                 self.dc_manager.remove_data_channel(self.peer_id);
             }
             RTCPeerConnectionState::Closed => {
                 info!("Closed peer connection: {}", self.peer_id);
                 self.dc_manager.remove_data_channel(self.peer_id);
+                let _ = self.cleanup_tx.send(self.peer_id).await;
             }
             _ => {}
         }
