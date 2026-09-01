@@ -15,8 +15,7 @@ Tauri provides the critical functions such as token persistence and interactivit
 
 ## Connect to central (managed) signaling server:
 You can simply download and install the desktop app and start chatting!
-* [Windows](https://drive.google.com/file/d/1VxwZuNbEW5Dux9elb9e3OVT-1NJx5gRY/view?usp=sharing)
-* [Linux](https://drive.google.com/file/d/11QZq9E_4FxygDAoFHxaUy50FD-211YhZ/view?usp=sharing)
+* [Windows](https://drive.google.com/drive/folders/1KfVHmG_62VIDWq7AVUS39jcRTiRpa6Gs?usp=sharing)
 
 Skip to the "Usage" section to learn more.
 
