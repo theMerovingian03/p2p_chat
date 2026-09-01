@@ -14,6 +14,11 @@ Tauri provides the critical functions such as token persistence and interactivit
 4. Deno ```2.9.2```
 
 ## Connect to central (managed) signaling server:
+You can simply download and install the desktop app and start chatting!
+* [Windows](https://drive.google.com/file/d/1VxwZuNbEW5Dux9elb9e3OVT-1NJx5gRY/view?usp=sharing)
+* [Linux](https://drive.google.com/file/d/11QZq9E_4FxygDAoFHxaUy50FD-211YhZ/view?usp=sharing)
+
+Skip to the "Usage" section to learn more.
 
 ## Setup your own signaling server & client:
 Make sure you're in ```p2p_chat/``` directory
@@ -29,7 +34,7 @@ Make sure you're in ```p2p_chat/``` directory
 
     CLIENT_BASE_URL=http://127.0.0.1:1420
     CLIENT_BASE_URL_PROD=http://tauri.localhost
-    
+
     WS_TOKEN_EXPIRATION_MINUTES=5
     ```
 
