@@ -26,8 +26,10 @@ Make sure you're in ```p2p_chat/``` directory
     # Feel free to change this:
     JWT_EXPIRATION_HOURS=3 
     REFRESH_EXPIRATION_HOURS=48
-    # Set according to your client configuration
+
     CLIENT_BASE_URL=http://127.0.0.1:1420
+    CLIENT_BASE_URL_PROD=http://tauri.localhost
+    
     WS_TOKEN_EXPIRATION_MINUTES=5
     ```
 

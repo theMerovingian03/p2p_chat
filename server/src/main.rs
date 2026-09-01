@@ -19,7 +19,7 @@ use axum::routing::delete;
 use axum::{
     Router,
     http::{
-        HeaderValue, Method,
+        Method,
         header::{AUTHORIZATION, CONTENT_TYPE},
     },
     middleware as axum_middleware,
@@ -51,6 +51,7 @@ async fn main() {
     let conf = Config::from_env().expect("Failed to load configuration");
     // Seperate here to avoid move errors
     let client_url = conf.client_url.clone();
+    let client_url_prod = conf.client_url_prod.clone();
     // Database Pool
     let pool = PgPoolOptions::new()
         .connect(&conf.database_url)
@@ -98,7 +99,11 @@ async fn main() {
         ));
     // Setup CORS
     let cors = CorsLayer::new()
-        .allow_origin(HeaderValue::from_str(&client_url).unwrap())
+        .allow_origin([
+            client_url.parse().unwrap(),
+            client_url_prod.parse().unwrap(),
+        ])
+        // .allow_origin(HeaderValue::from_str(&client_url).unwrap())
         .allow_methods([Method::GET, Method::POST, Method::GET, Method::DELETE])
         .allow_headers([CONTENT_TYPE, AUTHORIZATION]);
     // Main app
