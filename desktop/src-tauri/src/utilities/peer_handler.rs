@@ -67,9 +67,6 @@ impl PeerConnectionEventHandler for PeerHandler {
             RTCPeerConnectionState::Connecting => info!("Connecting to peer..."),
             RTCPeerConnectionState::Disconnected => {
                 info!("Peer disconnected (but not terminal): {}", self.peer_id);
-                // Disconnected is not a terminal state - WebRTC can recover and transition back to Connected.
-                // Do not remove the PeerConnection from WebRtcManager, just remove the DataChannel.
-                // This allows the underlying connection to remain alive and potentially recover.
                 let _ = self
                     .cleanup_tx
                     .send(crate::webrtc::manager::PeerCleanupEvent {
