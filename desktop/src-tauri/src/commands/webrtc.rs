@@ -12,7 +12,7 @@ pub async fn close_peer_connection(
 
     state
         .webrtc_manager
-        .cleanup_peer_connection(peer_id)
+        .close_peer_connection_manual(peer_id)
         .await?;
 
     Ok(())

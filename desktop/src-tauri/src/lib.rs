@@ -61,6 +61,13 @@ pub fn run() {
             tauri::async_runtime::spawn(async move {
                 manager.process_events(event_rx).await;
             });
+
+            // Initialize WebRTC cleanup task now that runtime is available
+            let webrtc_mgr = Arc::clone(&webrtc_manager);
+            tauri::async_runtime::spawn(async move {
+                webrtc_mgr.init_cleanup_task().await;
+            });
+
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![

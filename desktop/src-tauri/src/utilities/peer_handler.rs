@@ -1,4 +1,4 @@
-use crate::{data_channel::dc_manager::DcManager, utilities::signalizer::Signaling};
+use crate::{data_channel::dc_manager::DcManager, utilities::signalizer::Signaling, webrtc::manager::PeerCleanupEvent};
 use shared::models::websocket_models::{ClientEvent, IceCandidate};
 use std::sync::Arc;
 use tokio::sync::mpsc;
@@ -15,9 +15,13 @@ use webrtc::{
 #[derive(Clone)]
 pub struct PeerHandler {
     pub peer_id: Uuid,
+    /// Unique identifier for this specific PeerConnection. Generated when the connection is created.
+    /// Used to safely identify which connection should be cleaned up, preventing race conditions
+    /// where an old connection's cleanup callback could accidentally remove a newer connection.
+    pub connection_id: Uuid,
     pub signaling: Arc<dyn Signaling>,
     pub dc_manager: Arc<DcManager>,
-    pub cleanup_tx: mpsc::Sender<Uuid>,
+    pub cleanup_tx: mpsc::Sender<PeerCleanupEvent>,
 }
 
 #[async_trait::async_trait]
@@ -59,18 +63,37 @@ impl PeerConnectionEventHandler for PeerHandler {
             RTCPeerConnectionState::Connected => info!("Peer connected!"),
             RTCPeerConnectionState::Connecting => info!("Connecting to peer..."),
             RTCPeerConnectionState::Disconnected => {
-                info!("Peer disconnected: {}", self.peer_id);
+                info!("Peer disconnected (but not terminal): {}", self.peer_id);
+                // Disconnected is not a terminal state - WebRTC can recover and transition back to Connected.
+                // Do not remove the PeerConnection from WebRtcManager, just remove the DataChannel.
+                // This allows the underlying connection to remain alive and potentially recover.
                 self.dc_manager.remove_data_channel(self.peer_id);
             }
             RTCPeerConnectionState::Failed => {
                 error!("Peer connection failed: {}", self.peer_id);
-                let _ = self.cleanup_tx.send(self.peer_id).await;
+                // Failed is a terminal state - trigger cleanup of the PeerConnection.
+                // Include connection_id to ensure we only clean up this specific connection.
+                let _ = self
+                    .cleanup_tx
+                    .send(crate::webrtc::manager::PeerCleanupEvent {
+                        peer_id: self.peer_id,
+                        connection_id: self.connection_id,
+                    })
+                    .await;
                 self.dc_manager.remove_data_channel(self.peer_id);
             }
             RTCPeerConnectionState::Closed => {
                 info!("Closed peer connection: {}", self.peer_id);
+                // Closed is a terminal state - trigger cleanup of the PeerConnection.
+                // Include connection_id to ensure we only clean up this specific connection.
                 self.dc_manager.remove_data_channel(self.peer_id);
-                let _ = self.cleanup_tx.send(self.peer_id).await;
+                let _ = self
+                    .cleanup_tx
+                    .send(crate::webrtc::manager::PeerCleanupEvent {
+                        peer_id: self.peer_id,
+                        connection_id: self.connection_id,
+                    })
+                    .await;
             }
             _ => {}
         }

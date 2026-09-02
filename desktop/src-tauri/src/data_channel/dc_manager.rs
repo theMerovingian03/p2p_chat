@@ -102,7 +102,9 @@ impl DcManager {
             }
             DataChannelEvent::OnClose => {
                 info!("Closed DataChannel on peer: {}", peer_id);
-                self.emit_event("dc-event", json!(&AppEvent::PeerDisconnected { peer_id }));
+                // Remove the data channel from the map. This is idempotent - if already removed,
+                // remove_data_channel will simply do nothing.
+                self.remove_data_channel(peer_id);
             }
             DataChannelEvent::OnError => {
                 error!("Error occured on DataChannel");
