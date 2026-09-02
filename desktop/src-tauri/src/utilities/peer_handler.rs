@@ -1,4 +1,7 @@
-use crate::{data_channel::dc_manager::DcManager, utilities::signalizer::Signaling, webrtc::manager::PeerCleanupEvent};
+use crate::{
+    data_channel::dc_manager::DcManager, utilities::signalizer::Signaling,
+    webrtc::manager::PeerCleanupEvent,
+};
 use shared::models::websocket_models::{ClientEvent, IceCandidate};
 use std::sync::Arc;
 use tokio::sync::mpsc;
@@ -67,6 +70,13 @@ impl PeerConnectionEventHandler for PeerHandler {
                 // Disconnected is not a terminal state - WebRTC can recover and transition back to Connected.
                 // Do not remove the PeerConnection from WebRtcManager, just remove the DataChannel.
                 // This allows the underlying connection to remain alive and potentially recover.
+                let _ = self
+                    .cleanup_tx
+                    .send(crate::webrtc::manager::PeerCleanupEvent {
+                        peer_id: self.peer_id,
+                        connection_id: self.connection_id,
+                    })
+                    .await;
                 self.dc_manager.remove_data_channel(self.peer_id);
             }
             RTCPeerConnectionState::Failed => {
