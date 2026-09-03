@@ -69,3 +69,12 @@ export async function acceptChatRequest(from: string) {
         throw error;
     }
 }
+
+export async function requestPresences(friendIds: string[]) {
+    try {
+        await invoke("request_presences", { friendIds });
+    } catch (error) {
+        console.error("Failed to request presences:", error);
+        throw error;
+    }
+}

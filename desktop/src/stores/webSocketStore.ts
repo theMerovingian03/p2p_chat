@@ -1,6 +1,7 @@
 import { listen } from "@tauri-apps/api/event";
 import { create } from "zustand";
 import type { ServerEvent } from "../generated/bindings";
+import { useFriendStore } from "./friendStore";
 
 type WebsocketStatus = "connected" | "connecting" | "disconnected";
 
@@ -39,6 +40,8 @@ export const useWebsocketStore = create<WebsocketState>((set) => ({
                     onlineUserIds.add(event.id);
                     return { onlineUserIds };
                 });
+                // Sync friend status after updating online users
+                useFriendStore.getState().syncOnlineStatus();
                 break;
 
             case "PresenceOffline":
@@ -47,6 +50,21 @@ export const useWebsocketStore = create<WebsocketState>((set) => ({
                     onlineUserIds.delete(event.id);
                     return { onlineUserIds };
                 });
+                // Sync friend status after updating online users
+                useFriendStore.getState().syncOnlineStatus();
+                break;
+
+            case "PresencesResponse":
+                set((state) => {
+                    const onlineUserIds = new Set(state.onlineUserIds);
+                    // Add all online IDs from the response
+                    for (const id of event.online_ids) {
+                        onlineUserIds.add(id);
+                    }
+                    return { onlineUserIds };
+                });
+                // Sync friend status after updating online users
+                useFriendStore.getState().syncOnlineStatus();
                 break;
 
             case "ChatRequestIncoming": {

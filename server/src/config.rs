@@ -10,6 +10,7 @@ pub struct Config {
     pub ws_token_expiration_minutes: i64, // used by WS auth
     pub refresh_expiration_hours: i64,
     pub client_url: String,
+    pub client_url_prod: String,
 }
 
 #[derive(Debug, Error)]
@@ -32,6 +33,7 @@ impl Config {
             ws_token_expiration_minutes: env::var("WS_TOKEN_EXPIRATION_MINUTES")?.parse()?,
             refresh_expiration_hours: env::var("REFRESH_EXPIRATION_HOURS")?.parse()?,
             client_url: env::var("CLIENT_BASE_URL")?,
+            client_url_prod: env::var("CLIENT_BASE_URL_PROD")?,
         })
     }
 }

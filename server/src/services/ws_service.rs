@@ -9,6 +9,7 @@ use uuid::Uuid;
 use crate::{
     errors::AppError,
     repositories::friend_repository::get_friend_username,
+    services::friend_service::service_get_friend_ids,
     utilities::{app_to_ws_err::app_error_to_ws_error, connection_manager::ConnectionManager},
 };
 
@@ -24,7 +25,15 @@ pub async fn handle_socket(
     // Outgoing: Convert ServerEvent to Message::Text(...)
     // Incoming: Parse Message::Text(...) to ClientEvent
     let (tx, mut rx) = tokio::sync::mpsc::channel::<ServerEvent>(100);
-    connection_manager.connect(user_id, tx);
+    let conn_id = Uuid::new_v4();
+    connection_manager.connect(user_id, tx, conn_id);
+
+    // Broadcast PresenceOnline to all friends
+    if let Ok(friend_ids) = service_get_friend_ids(&db_pool, user_id).await {
+        connection_manager
+            .broadcast_to_users(&friend_ids, ServerEvent::PresenceOnline { id: user_id })
+            .await;
+    }
 
     loop {
         // Run branches concurrently
@@ -89,7 +98,14 @@ pub async fn handle_socket(
         }
     }
 
-    connection_manager.disconnect(&user_id);
+    // Broadcast PresenceOffline to all friends when disconnecting
+    if let Ok(friend_ids) = service_get_friend_ids(&db_pool, user_id).await {
+        connection_manager
+            .broadcast_to_users(&friend_ids, ServerEvent::PresenceOffline { id: user_id })
+            .await;
+    }
+
+    connection_manager.disconnect(&user_id, &conn_id);
 }
 
 pub async fn handle_client_event(
@@ -99,6 +115,18 @@ pub async fn handle_client_event(
     db_pool: &PgPool,
 ) {
     match event {
+        ClientEvent::RequestPresences { friend_ids } => {
+            // Check which friend_ids are currently online
+            let online_ids: Vec<Uuid> = friend_ids
+                .into_iter()
+                .filter(|id| connection_manager.is_online(id))
+                .collect();
+
+            // Send response back to the requesting user
+            let _ = connection_manager
+                .send_to_user(&user_id, ServerEvent::PresencesResponse { online_ids })
+                .await;
+        }
         ClientEvent::ChatRequestSend { to } => {
             // service_create_chat_request already sends ServerEvent::ChatRequestIncoming
             if let Err(error) =

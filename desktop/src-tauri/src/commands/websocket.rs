@@ -57,3 +57,24 @@ pub async fn accept_chat_request(
 
     Ok(())
 }
+
+/// Request presence status for a list of friends
+#[tauri::command]
+pub async fn request_presences(
+    friend_ids: Vec<String>,
+    app_state: State<'_, AppState>,
+) -> Result<(), String> {
+    let friend_uuids: Result<Vec<Uuid>, _> = friend_ids
+        .into_iter()
+        .map(|id| Uuid::parse_str(&id))
+        .collect();
+
+    let friend_uuids = friend_uuids.map_err(|e| e.to_string())?;
+
+    let event = ClientEvent::RequestPresences {
+        friend_ids: friend_uuids,
+    };
+    app_state.websocket_manager.send_event(event).await?;
+
+    Ok(())
+}

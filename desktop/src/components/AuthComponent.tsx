@@ -4,9 +4,10 @@ import Spinner from "./Spinner";
 import CommonButton from "./CommonButtons";
 import { useAuthStore } from "../stores/authStore";
 import { getWsToken } from "../api/auth";
-import { webSocketService } from "../services/websocketService";
+import { webSocketService, requestPresences } from "../services/websocketService";
 import { useNavigate } from "react-router-dom";
 import { useFriendStore } from "../stores/friendStore";
+import { useWebsocketStore } from "../stores/webSocketStore";
 import { me } from "../api/user";
 import { env } from "../config/env";
 
@@ -16,6 +17,7 @@ export default function AuthComponent() {
     const user = useAuthStore((state) => state.user);
     const setUser = useAuthStore((state) => state.setUser);
     const initializeFriends = useFriendStore((state) => state.initializeFriends);
+    const wsStatus = useWebsocketStore((state) => state.status);
 
     const [initializing, setInitializing] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -78,6 +80,19 @@ export default function AuthComponent() {
             void webSocketService.disconnect();
         };
     }, [setUser, user, initializeFriends]);
+
+    // Request presences when WebSocket connects
+    useEffect(() => {
+        if (wsStatus === "connected") {
+            const friendIds = Object.keys(useFriendStore.getState().friends);
+            if (friendIds.length > 0) {
+                console.log("Requesting presence for friends:", friendIds);
+                requestPresences(friendIds).catch((error) => {
+                    console.error("Failed to request presences:", error);
+                });
+            }
+        }
+    }, [wsStatus]);
 
     if (initializing) {
         return (

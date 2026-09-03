@@ -30,6 +30,7 @@ pub enum ServerEvent {
     ChatRequestAccepted { from: Uuid },
     PresenceOnline { id: Uuid },
     PresenceOffline { id: Uuid },
+    PresencesResponse { online_ids: Vec<Uuid> },
     WebRtcOffer { from: Uuid, sdp: String },
     WebRtcAnswer { from: Uuid, sdp: String },
     IceCandidate { from: Uuid, candidate: IceCandidate },
@@ -41,7 +42,7 @@ pub enum ServerEvent {
 #[derive(Debug, Serialize, Deserialize, Type)]
 #[serde(tag = "type")]
 pub enum ClientEvent {
-    // RequestFriendPresences { friend_list: Vec<Uuid> },
+    RequestPresences { friend_ids: Vec<Uuid> },
     ChatRequestSend { to: Uuid },
     ChatRequestAccept { from: Uuid },
     WebRtcOffer { to: Uuid, sdp: String },

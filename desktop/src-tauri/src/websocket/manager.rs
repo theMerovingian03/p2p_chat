@@ -8,12 +8,17 @@ use tauri::Emitter;
 use tokio::sync::mpsc;
 use tokio_tungstenite::connect_async;
 use tracing::{debug, error, info};
+use uuid::Uuid;
 
 // WebSocket manager responsible for connection lifecycle and event handling
 // Unbounded causes backpressure
 pub struct WebSocketManager {
     status: Arc<Mutex<WebSocketStatus>>,
     sender: Arc<Mutex<Option<mpsc::Sender<ClientEvent>>>>,
+    /// Unique identifier for the currently active WebSocket connection.
+    /// Each new connection gets a new ID. Used to prevent an old reader task
+    /// from accidentally cleaning up a new connection.
+    connection_id: Arc<Mutex<Uuid>>,
     app_handle: Arc<Mutex<Option<tauri::AppHandle>>>,
 }
 
@@ -29,6 +34,7 @@ impl WebSocketManager {
         Self {
             status: Arc::new(Mutex::new(WebSocketStatus::Disconnected)),
             sender: Arc::new(Mutex::new(None)),
+            connection_id: Arc::new(Mutex::new(Uuid::new_v4())),
             app_handle: Arc::new(Mutex::new(None)),
         }
     }
@@ -79,6 +85,14 @@ impl WebSocketManager {
 
         self.emit_status_change(WebSocketStatus::Connecting);
 
+        // Generate a new unique ID for this connection attempt
+        let new_connection_id = Uuid::new_v4();
+        *self.connection_id.lock() = new_connection_id;
+        debug!(
+            "Starting new WebSocket connection with ID: {}",
+            new_connection_id
+        );
+
         // Build connection URL with token
         let url = format!("{}?ws_token={}", ws_url, urlencoding::encode(&ws_token));
 
@@ -98,6 +112,7 @@ impl WebSocketManager {
                 // Spawn tasks for handling the connection
                 let status = Arc::clone(&self.status);
                 let app_handle = Arc::clone(&self.app_handle);
+                let connection_id = Arc::clone(&self.connection_id);
 
                 // Task to read messages from server
                 let read_handle = tokio::spawn(read_websocket_messages(
@@ -110,16 +125,30 @@ impl WebSocketManager {
                 tokio::spawn(write_websocket_messages(write, rx));
 
                 // Task to handle connection close detection
+                // This closure captures the current connection_id. If a new connection is established
+                // before this task completes, the connection_id will differ and this cleanup won't run.
                 tokio::spawn(async move {
                     // Wait for the read task to complete (connection closed)
                     let _ = read_handle.await;
 
-                    // Connection closed, update status
-                    *status.lock() = WebSocketStatus::Disconnected;
-                    if let Some(app) = app_handle.lock().as_ref() {
-                        let _ = app.emit(
-                            "ws-status-changed",
-                            &serde_json::json!({ "status": "disconnected" }),
+                    // Connection closed - only mark as disconnected if this is still the active connection
+                    // If a new connection has been established, the connection_id will have changed
+                    let current_connection_id = *connection_id.lock();
+                    if current_connection_id == new_connection_id {
+                        // This is the correct (and latest) connection - safe to mark as disconnected
+                        *status.lock() = WebSocketStatus::Disconnected;
+                        if let Some(app) = app_handle.lock().as_ref() {
+                            let _ = app.emit(
+                                "ws-status-changed",
+                                &serde_json::json!({ "status": "disconnected" }),
+                            );
+                        }
+                        debug!("WebSocket connection {} closed", new_connection_id);
+                    } else {
+                        // A newer connection exists - don't clean up
+                        debug!(
+                            "Ignoring closure for stale WebSocket connection {}; newer connection {} is active",
+                            new_connection_id, current_connection_id
                         );
                     }
                 });

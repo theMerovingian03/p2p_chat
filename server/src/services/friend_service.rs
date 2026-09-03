@@ -56,3 +56,11 @@ pub async fn service_get_friends(
     let results = get_friends(db, current_user_id).await?;
     Ok(results)
 }
+
+pub async fn service_get_friend_ids(
+    db: &PgPool,
+    current_user_id: Uuid,
+) -> Result<Vec<Uuid>, AppError> {
+    let friends = get_friends(db, current_user_id).await?;
+    Ok(friends.into_iter().map(|f| f.friend_id).collect())
+}
