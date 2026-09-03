@@ -4,15 +4,18 @@ import { sendChatRequest } from "../../../services/websocketService";
 interface SendChatRequestProps {
     username: string;
     userId: string;
+    isOnline: boolean;
     onClose: () => void;
 }
 
-export default function SendChatRequestDialog({ username, userId, onClose }: SendChatRequestProps) {
+export default function SendChatRequestDialog({ username, userId, isOnline, onClose }: SendChatRequestProps) {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
     const [success, setSuccess] = useState(false);
 
     async function handleSendRequest() {
+        if (!isOnline) return;
+
         try {
             setLoading(true);
             setError("");
@@ -44,7 +47,7 @@ export default function SendChatRequestDialog({ username, userId, onClose }: Sen
             {error && <span className="mx-1 text-sm text-red-300">{error}</span>}
             <div className="m-2 flex gap-3">
                 <button
-                    disabled={loading || success}
+                    disabled={loading || success || !isOnline}
                     onClick={handleSendRequest}
                     className="cursor-pointer rounded-sm border border-white/20 p-1.5 transition-colors duration-200 hover:bg-white hover:text-blue-900 disabled:cursor-default disabled:opacity-75"
                 >
